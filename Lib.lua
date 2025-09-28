@@ -530,10 +530,10 @@ function rareLib:AddSlider(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V5 - A VERSÃO FINAL - by RARO XT & DRIP
--- [ ! ] - PARTE 9/20: DROPDOWNS
+-- [ ! ] - PARTE 9/20: DROPDOWNS (CORRIGIDA)
 -- ====================================================================================== --
 
--- ID: I1 - A API PÚBLICA PARA CRIAR DROPDOWNS
+-- ID: I1 - A API PÚBLICA PARA CRIAR DROPDOWNS (REESCRITA E À PROVA DE BALAS)
 function rareLib:AddDropdown(options)
     local Theme = self.Theme
     local Options, Default, Callback = options.Options or {}, options.Default or options.Options[1], options.Callback
@@ -558,9 +558,10 @@ function rareLib:AddDropdown(options)
         Position = UDim2.new(1, -15, 0.5, -6), BackgroundTransparency = 1
     })
     
-    local Overlay = pCreate("Frame", {
+    -- CORREÇÃO: O Overlay agora é um TextButton transparente. Isso GARANTE que o clique funcione.
+    local Overlay = pCreate("TextButton", {
         Parent = self.MainGui, Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1, ZIndex = 3, Visible = false
+        BackgroundTransparency = 1, ZIndex = 3, Visible = false, Text = ""
     })
     
     local ListPanel = pCreate("ScrollingFrame", {
@@ -579,8 +580,9 @@ function rareLib:AddDropdown(options)
         
         if isDropdownVisible then
             local pos = DropdownButton.AbsolutePosition
+            -- CORREÇÃO: Altura máxima aumentada para 200px para ser mais fácil de usar.
             local listHeight = ListPanel.CanvasSize.Y.Offset + 10
-            local targetHeight = math.min(listHeight, 150)
+            local targetHeight = math.min(listHeight, 200) -- Aumentado
             local x, y = pos.X, pos.Y + DropdownButton.AbsoluteSize.Y
             if y + targetHeight > self.MainGui.AbsoluteSize.Y then y = pos.Y - targetHeight end
             
@@ -612,7 +614,8 @@ function rareLib:AddDropdown(options)
     end
     
     DropdownButton.MouseButton1Click:Connect(ToggleDropdown)
-    Overlay.MouseButton1Down:Connect(function() if isDropdownVisible then ToggleDropdown() end end)
+    -- CORREÇÃO: Agora conectamos ao evento de clique do TextButton, que é válido.
+    Overlay.MouseButton1Click:Connect(function() if isDropdownVisible then ToggleDropdown() end end)
 
     local API = {}
     API.SetValue = SelectOption
