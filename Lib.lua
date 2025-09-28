@@ -60,7 +60,7 @@ function rareLib:new(Title)
         ["Color Dark Text"] = Color3.fromRGB(150, 150, 150)
     }
     Hub.Config = {
-        UISize = {620, 360},
+        UISize = {700, 450},
         TabSize = 150
     }
     Hub.Tabs = {}
@@ -686,7 +686,7 @@ function rareLib:__buildConstellation()
     })
     
     local particles, lines = {}, {}
-    local numParticles, connectDistance = 35, 100
+    local numParticles, connectDistance = 50, 120
 
     for i = 1, numParticles do
         local p = pCreate("Frame", {
@@ -717,13 +717,13 @@ function rareLib:__buildConstellation()
             for j = i + 1, #particles do
                 local p2 = particles[j]
                 local dist = (p1.pos - p2.pos).Magnitude
-                if dist < connectDistance then
+if dist < connectDistance then
                     table.insert(lines, pCreate("Frame", {
-                        Parent = particleFrame, Size = UDim2.new(0, dist, 0, 1),
+                        Parent = particleFrame, Size = UDim2.new(0, dist, 0, 2), -- <<< LINHA NOVA (MAIS GROSSA)
                         Position = UDim2.fromOffset((p1.pos.X + p2.pos.X) / 2, (p1.pos.Y + p2.pos.Y) / 2),
                         Rotation = math.deg(math.atan2(p2.pos.Y - p1.pos.Y, p2.pos.X - p1.pos.X)),
                         BackgroundColor3 = Theme["Color Theme"], BorderSizePixel = 0, ZIndex = 0,
-                        BackgroundTransparency = 1 - (1 - dist / connectDistance) * 0.8,
+                        BackgroundTransparency = 1 - (1 - dist / connectDistance) * 0.6, -- <<< LINHA NOVA (MENOS TRANSPARENTE)
                     }))
                 end
             end
