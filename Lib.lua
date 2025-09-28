@@ -723,8 +723,13 @@ end
 
 -- ID: L1 - A FUNÇÃO "PRIVADA" PARA CRIAR A ANIMAÇÃO DE ENTRADA
 function rareLib:__buildIntroAnimation()
-    -- Começa escondendo o MainFrame (agora usando o CanvasGroup que a gente vai criar)
-    self.MainFrame.GroupTransparency = 1
+    -- CORREÇÃO: Cria o CanvasGroup PRIMEIRO
+    local canvas = pCreate("CanvasGroup", {
+        Parent = self.MainFrame
+    })
+
+    -- Esconde a UI principal pra animação rolar primeiro (agora usando o CanvasGroup)
+    canvas.GroupTransparency = 1
     
     local LogoText = pCreate("TextLabel", {
         Parent = self.MainGui,
@@ -749,11 +754,17 @@ function rareLib:__buildIntroAnimation()
     -- Animações
     local tweenIn = TweenService:Create(LogoText, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0)})
     local tweenOut = TweenService:Create(LogoText, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, -0.2, 0), TextTransparency = 1})
-    local tweenUI = TweenService:Create(self.MainFrame, TweenInfo.new(0.5), {GroupTransparency = 0})
+    -- 4. A UI principal aparece com um fade in.
+    -- CORREÇÃO: A gente já setou a transparência no começo. Agora a gente cria o tween direto no 'canvas' que criamos.
+    local tweenUI = TweenService:Create(canvas, TweenInfo.new(0.5), {GroupTransparency = 0})
 
-    -- Sequência de execução
+    -- Executando a sequência
     task.spawn(function()
-        tweenIn:Play()
+-- ... (código do tweenIn, wait, tweenOut) ...
+        LogoText:Destroy() -- Limpa o lixo
+
+        -- CORREÇÃO: A gente não precisa mais mexer no '.Visible'. Só dar play no tween.
+        tweenUI:Play()
         tweenIn.Completed:Wait()
         task.wait(0.7)
         tweenOut:Play()
