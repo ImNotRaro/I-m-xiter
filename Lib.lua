@@ -1,30 +1,12 @@
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - A VERSÃO DEFINITIVA - by RARO XT & DRIP
--- [ ! ] - PARTE 1/20: A FUNDAÇÃO (REVISADA E REFORÇADA)
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
+-- [ ! ] - PARTE 1/20: A ESTRUTURA MESTRA (O OBJETO IMORTAL)
 -- ====================================================================================== --
 
--- ID: A1 - O QUARTEL-GENERAL (A TABELA PRINCIPAL)
-local rareLib = {
-    Themes = {
-        ["BloodMoon"] = {
-            ["Color Hub BG"] = Color3.fromRGB(15, 15, 15),
-            ["Color Panel BG"] = Color3.fromRGB(12, 12, 12),
-            ["Color Stroke"] = Color3.fromRGB(40, 40, 40),
-            ["Color Theme"] = Color3.fromRGB(139, 0, 0),
-            ["Color Text"] = Color3.fromRGB(240, 240, 240),
-            ["Color Dark Text"] = Color3.fromRGB(150, 150, 150)
-        }
-    },
-    Save = {
-        Theme = "BloodMoon",
-        UISize = {620, 360},
-        TabSize = 150
-    },
-    Instances = {},
-    Tabs = {},
-    CurrentTab = nil,
-    Window = nil -- Referência para a janela principal
-}
+-- ID: A1 - A "CLASSE" RARELIB
+-- Tudo começa aqui. Essa tabela é o molde de toda a nossa UI.
+local rareLib = {}
+rareLib.__index = rareLib -- A mágica que faz o ":" funcionar e evita o erro da V3
 
 -- ID: A2 - SERVIÇOS ESSENCIAIS (AS FERRAMENTAS DO ARSENAL)
 local CoreGui = game:GetService("CoreGui")
@@ -35,33 +17,55 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 -- ID: A3 - AS FUNÇÕES-MESTRE (NOSSA FÁBRICA DE PEÇAS)
--- Revisadas para serem ainda mais seguras.
+-- Funções de base que vão ser usadas em todo o script.
 
--- Função para criar qualquer instância da UI.
 local function Create(instanceType, properties)
     local newInstance = Instance.new(instanceType)
     if properties then
         for prop, value in pairs(properties) do
-            -- pcall é nosso colete a prova de balas.
-            pcall(function()
-                newInstance[prop] = value
-            end)
+            pcall(function() newInstance[prop] = value end)
         end
     end
     return newInstance
 end
 
--- Função para rastrear as instâncias que mudam de cor com o tema.
 local function Track(instance, themeType)
-    table.insert(rareLib.Instances, {Instance = instance, Type = themeType})
+    -- Por enquanto, essa função só retorna a instância.
+    -- No futuro, a gente vai usar ela pra trocar de tema.
     return instance
 end
+
+-- ID: A4 - O CONSTRUTOR DO OBJETO (O PONTO DE PARTIDA)
+-- Essa é a única função que o usuário vai chamar no começo.
+function rareLib:new(Title, IconURL)
+    local self = setmetatable({}, rareLib) -- Cria um novo "objeto" Hub a partir do molde rareLib
+
+    -- INICIALIZAÇÃO DO HUB
+    self.Theme = { -- Tema BloodMoon direto no objeto
+        ["Color Hub BG"] = Color3.fromRGB(15, 15, 15),
+        ["Color Panel BG"] = Color3.fromRGB(12, 12, 12),
+        ["Color Stroke"] = Color3.fromRGB(40, 40, 40),
+        ["Color Theme"] = Color3.fromRGB(139, 0, 0),
+        ["Color Text"] = Color3.fromRGB(240, 240, 240),
+        ["Color Dark Text"] = Color3.fromRGB(150, 150, 150)
+    }
+    self.Config = {
+        UISize = {620, 360},
+        TabSize = 150
+    }
+    self.Tabs = {}
+    self.CurrentTab = nil
+    
+    -- Futuras funções e propriedades do Hub vão viver aqui dentro do 'self'
+    
+    return self
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
--- [ ! ] - PARTE 2/20: A JANELA PRINCIPAL
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
+-- [ ! ] - PARTE 2/20: O PALÁCIO (DESENHANDO A JANELA PRINCIPAL)
 -- ====================================================================================== --
 
--- ID: B1 - A FUNÇÃO DE ARRASTAR PERFEITA (REVISADA)
+-- ID: B1 - A FUNÇÃO DE ARRASTAR (MOBILE SOBERANO)
 local function MakeDrag(instance)
     local isDragging = false
     local startPos, dragStart
@@ -89,18 +93,17 @@ local function MakeDrag(instance)
     end)
 end
 
--- ID: B2 - O CONSTRUTOR DA JANELA (A FUNÇÃO MESTRA)
-function rareLib:CreateWindow(Title, IconURL)
-    -- Limpa qualquer lixo de UI antiga
+-- ID: B2 - O CONSTRUTOR DA JANELA
+-- Esta função agora é chamada DENTRO do :new()
+function rareLib:__CreateWindow(Title, IconURL)
+    local Theme = self.Theme
+    local UISizeX, UISizeY = unpack(self.Config.UISize)
+    local TabSize = self.Config.TabSize
+
+    -- Limpa qualquer lixo
     if CoreGui:FindFirstChild("RARE_LIB_UI") then CoreGui.RARE_LIB_UI:Destroy() end
 
-    local Theme = rareLib.Themes[rareLib.Save.Theme]
-    local UISizeX, UISizeY = unpack(rareLib.Save.UISize)
-    local TabSize = rareLib.Save.TabSize
-
-    local MainGui = Create("ScreenGui", {
-        Parent = CoreGui, Name = "RARE_LIB_UI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    })
+    local MainGui = Create("ScreenGui", {Parent = CoreGui, Name = "RARE_LIB_UI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling})
     
     local MainFrame = Track(Create("Frame", {
         Parent = MainGui, Name = "Hub", Size = UDim2.fromOffset(UISizeX, UISizeY),
@@ -122,50 +125,55 @@ function rareLib:CreateWindow(Title, IconURL)
 
     Create("UIPadding", {Parent = MainFrame, PaddingLeft=UDim.new(0,10), PaddingRight=UDim.new(0,10), PaddingTop=UDim.new(0,10), PaddingBottom=UDim.new(0,10)})
     
-    local NavContainer = Track(Create("ScrollingFrame", {
+    self.NavContainer = Track(Create("ScrollingFrame", {
         Parent = MainFrame, Name = "NavContainer", Size = UDim2.new(0, TabSize, 1, 0),
         BackgroundColor3 = Theme["Color Hub BG"], BorderSizePixel = 0, AutomaticCanvasSize = "Y",
         ScrollBarImageColor3 = Theme["Color Theme"], ScrollBarThickness = 6
     }), "ScrollBar")
-    Create("UICorner", {Parent = NavContainer, CornerRadius = UDim.new(0, 6)})
-    Create("UIListLayout", {Parent = NavContainer, Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder})
-    Create("UIPadding", {Parent = NavContainer, PaddingTop = UDim.new(0, 10)})
+    Create("UICorner", {Parent = self.NavContainer, CornerRadius = UDim.new(0, 6)})
+    Create("UIListLayout", {Parent = self.NavContainer, Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder})
+    Create("UIPadding", {Parent = self.NavContainer, PaddingTop = UDim.new(0, 10)})
     
-    local RightPanel = Track(Create("Frame", {
+    self.RightPanel = Track(Create("Frame", {
         Parent = MainFrame, Name = "RightPanel", Size = UDim2.new(0, 200, 1, 0),
         Position = UDim2.new(1, -200, 0, 0), BackgroundColor3 = Theme["Color Panel BG"], BorderSizePixel = 0
     }), "Panel")
-    Create("UICorner", {Parent = RightPanel, CornerRadius = UDim.new(0, 6)})
-    Create("UIPadding", {Parent = RightPanel, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
+    Create("UICorner", {Parent = self.RightPanel, CornerRadius = UDim.new(0, 6)})
+    Create("UIPadding", {Parent = self.RightPanel, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
 
-    local ContentPanel = Track(Create("Frame", {
+    self.ContentPanel = Track(Create("Frame", {
         Parent = MainFrame, Name = "ContentPanel", Size = UDim2.new(1, -(TabSize + 10 + 200), 1, 0),
         Position = UDim2.new(0, TabSize + 10, 0, 0), BackgroundColor3 = Theme["Color Hub BG"], BorderSizePixel = 0
     }), "Frame")
-    Create("UICorner", {Parent = ContentPanel, CornerRadius = UDim.new(0, 6)})
+    Create("UICorner", {Parent = self.ContentPanel, CornerRadius = UDim.new(0, 6)})
 
-    -- Armazena as referências na tabela principal pra todo o script ter acesso
-    rareLib.Window = {
-        MainGui = MainGui,
-        MainFrame = MainFrame,
-        NavContainer = NavContainer,
-        ContentPanel = ContentPanel,
-        RightPanel = RightPanel,
-    }
+    -- Armazena as referências principais no próprio objeto Hub (self)
+    self.MainGui = MainGui
+    self.MainFrame = MainFrame
+end
+
+-- ID: B3 - ATUALIZANDO O CONSTRUTOR PRINCIPAL
+-- A gente vai modificar a função :new() da Parte 1 pra ela chamar a criação da janela.
+local OriginalNew = rareLib.new
+function rareLib:new(Title, IconURL)
+    local self = OriginalNew(self, Title, IconURL) -- Chama a função original pra criar o objeto
+
+    self:__CreateWindow(Title, IconURL) -- Chama a nova função pra desenhar a UI
+
+    return self -- Retorna o objeto Hub completo
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 3/20: A SALA DO TRONO
 -- ====================================================================================== --
 
 -- ID: C1 - O CONSTRUTOR DA FICHA DE STATUS
-function rareLib:CreateStatusFicha()
-    local RightPanel = self.Window.RightPanel
-    local Theme = self.Themes[self.Save.Theme]
+function rareLib:__CreateStatusFicha()
+    local Theme = self.Theme
     local LocalPlayer = Players.LocalPlayer
 
     local FichaRPG = Create("Frame", {
-        Parent = RightPanel, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Name = "FichaRPG"
+        Parent = self.RightPanel, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Name = "FichaRPG"
     })
     
     Create("UIGradient", {
@@ -193,7 +201,7 @@ function rareLib:CreateStatusFicha()
 
     Track(Create("TextLabel", {
         Parent = FichaRPG, Size = UDim2.new(1, 0, 0, 20), Position = UDim2.new(0, 0, 0, 155),
-        Font = Enum.Font.Gotham, Text = "⛩️ RARE LIB V3", TextColor3 = Theme["Color Theme"], TextSize = 14, BackgroundTransparency = 1
+        Font = Enum.Font.Gotham, Text = "⛩️ RARE LIB V4", TextColor3 = Theme["Color Theme"], TextSize = 14, BackgroundTransparency = 1
     }), "Theme")
 
     local function CreateStatusRow(name, posY)
@@ -215,8 +223,9 @@ function rareLib:CreateStatusFicha()
     local PingLabel = CreateStatusRow("PING", 230)
     local FPSLabel = CreateStatusRow("FPS", 260)
 
+    -- Loop de atualização otimizado
     task.spawn(function()
-        while FichaRPG and FichaRPG.Parent do
+        while self.MainGui and self.MainGui.Parent do -- Loop só roda enquanto a UI existir
             pcall(function()
                 local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                 if hum then VidaLabel.Text = string.format("%d/%d", math.floor(hum.Health), math.floor(hum.MaxHealth)) else VidaLabel.Text = "N/A" end
@@ -227,18 +236,28 @@ function rareLib:CreateStatusFicha()
         end
     end)
 end
+
+-- ID: C2 - ATUALIZANDO O CONSTRUTOR PRINCIPAL
+local OriginalNew_C = rareLib.new
+function rareLib:new(Title, IconURL)
+    local self = OriginalNew_C(self, Title, IconURL)
+
+    self:__CreateStatusFicha() -- Adiciona a criação da ficha ao processo de inicialização
+
+    return self
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 4/20: AS ABAS
 -- ====================================================================================== --
 
 -- ID: D1 - O CONSTRUTOR DE TABS
+-- Essa função vai ser a que o usuário vai chamar: Hub:CreateTab("Nome")
 function rareLib:CreateTab(TName, TIcon)
-    local Window = self.Window
-    local Theme = self.Themes[self.Save.Theme]
+    local Theme = self.Theme
     
     local TabButton = Track(Create("TextButton", {
-        Parent = Window.NavContainer, Name = tostring(TName) .. "Button", Text = "  " .. tostring(TName),
+        Parent = self.NavContainer, Name = tostring(TName) .. "Button", Text = "  " .. tostring(TName),
         TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.Gotham, TextSize = 16,
         TextColor3 = Theme["Color Dark Text"], Size = UDim2.new(1, 0, 0, 35),
         BackgroundColor3 = Color3.fromRGB(25, 25, 25), LayoutOrder = #self.Tabs + 1, AutoButtonColor = false
@@ -247,25 +266,30 @@ function rareLib:CreateTab(TName, TIcon)
     Create("UIStroke", {Parent = TabButton, Color = Theme["Color Stroke"], Thickness = 1, ApplyStrokeMode = "Border"})
 
     local ContentContainer = Create("ScrollingFrame", {
-        Parent = Window.ContentPanel, Name = tostring(TName) .. "_Container", Size = UDim2.new(1, 0, 1, 0),
+        Parent = self.ContentPanel, Name = tostring(TName) .. "_Container", Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, AutomaticCanvasSize = "Y", ScrollingDirection = "Y",
         ScrollBarImageColor3 = Theme["Color Theme"], ScrollBarThickness = 6, Visible = false
     })
     Create("UIListLayout", {Parent = ContentContainer, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
     Create("UIPadding", {Parent = ContentContainer, PaddingTop = UDim.new(0, 10), PaddingRight = UDim.new(0, 5)})
 
+    -- A API da Aba, com placeholders que a gente vai preencher nas próximas partes
     local Tab = {
         Name = TName,
         Container = ContentContainer,
         Button = TabButton,
+        AddButton = function() end,
+        AddToggle = function() end,
+        AddSlider = function() end,
+        AddDropdown = function() end,
+        AddTextbox = function() end,
     }
 
     local function SelectTab()
         if self.CurrentTab == Tab then return end
         if self.CurrentTab then
-            local oldTab = self.CurrentTab
-            oldTab.Container.Visible = false
-            TweenService:Create(oldTab.Button, TweenInfo.new(0.2), {
+            self.CurrentTab.Container.Visible = false
+            TweenService:Create(self.CurrentTab.Button, TweenInfo.new(0.2), {
                 TextColor3 = Theme["Color Dark Text"], BackgroundColor3 = Color3.fromRGB(25, 25, 25)
             }):Play()
         end
@@ -283,14 +307,28 @@ function rareLib:CreateTab(TName, TIcon)
     
     return Tab
 end
+
+-- ID: D2 - ATUALIZANDO O CONSTRUTOR PRINCIPAL
+local OriginalNew_D = rareLib.new
+function rareLib:new(Title, IconURL)
+    local self = OriginalNew_D(self, Title, IconURL)
+
+    -- Agora a função CreateTab faz parte do objeto Hub
+    self.CreateTab = function(TName, TIcon)
+        return rareLib.CreateTab(self, TName, TIcon)
+    end
+
+    return self
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 5/20: BOTÕES
 -- ====================================================================================== --
 
 -- ID: E1 - A BASE DOS COMPONENTES (FRAME DE OPÇÃO)
-local function CreateOptionFrame(Container, Title, Description, RightSideWidth)
-    local Theme = rareLib.Themes[rareLib.Save.Theme]
+-- Essa função privada vai ser a mãe de todos os componentes.
+function rareLib:__CreateOptionFrame(Container, Title, Description, RightSideWidth)
+    local Theme = self.Theme
     local Frame = Track(Create("Frame", {
         Parent = Container, Size = UDim2.new(1, 0, 0, 45),
         BackgroundColor3 = Theme["Color Panel BG"], Name = "Option", LayoutOrder = #Container:GetChildren()
@@ -315,8 +353,9 @@ local function CreateOptionFrame(Container, Title, Description, RightSideWidth)
 end
 
 -- ID: E2 - ADICIONANDO BOTÕES ÀS ABAS
+-- Essa é a função que o usuário vai chamar: Tab:AddButton(...)
 function rareLib:AddButton(Tab, Title, Desc, Callback)
-    local Frame = CreateOptionFrame(Tab.Container, Title, Desc, 30)
+    local Frame = self:__CreateOptionFrame(Tab.Container, Title, Desc, 30)
     
     Create("ImageLabel", {
         Parent = Frame, Image = "rbxassetid://10709791437", Size = UDim2.new(0, 15, 0, 15),
@@ -329,7 +368,6 @@ function rareLib:AddButton(Tab, Title, Desc, Callback)
     
     Button.MouseButton1Click:Connect(function()
         pcall(Callback)
-        -- Animação de clique
         local originalColor = Frame.BackgroundColor3
         TweenService:Create(Frame, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
         task.wait(0.1)
@@ -338,15 +376,28 @@ function rareLib:AddButton(Tab, Title, Desc, Callback)
     
     return { Frame = Frame }
 end
+
+-- ID: E3 - ATUALIZANDO A API DA ABA
+local OriginalTab = rareLib.CreateTab
+function rareLib:CreateTab(TName, TIcon)
+    local Tab = OriginalTab(self, TName, TIcon)
+
+    -- Agora a gente preenche o placeholder que criamos na Parte 4
+    Tab.AddButton = function(Title, Desc, Callback)
+        return self:AddButton(Tab, Title, Desc, Callback)
+    end
+    
+    return Tab
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 6/20: TOGGLES
 -- ====================================================================================== --
 
 -- ID: F1 - ADICIONANDO TOGGLES ÀS ABAS
 function rareLib:AddToggle(Tab, Title, Desc, InitialValue, Callback)
-    local Theme = self.Themes[self.Save.Theme]
-    local Frame = CreateOptionFrame(Tab.Container, Title, Desc, 40)
+    local Theme = self.Theme
+    local Frame = self:__CreateOptionFrame(Tab.Container, Title, Desc, 40)
     local state = InitialValue or false
     
     local ToggleButton = Create("TextButton", {
@@ -393,15 +444,27 @@ function rareLib:AddToggle(Tab, Title, Desc, InitialValue, Callback)
         GetState = function() return state end
     }
 end
+
+-- ID: F2 - ATUALIZANDO A API DA ABA
+local OriginalTab_F = rareLib.CreateTab
+function rareLib:CreateTab(TName, TIcon)
+    local Tab = OriginalTab_F(self, TName, TIcon)
+
+    Tab.AddToggle = function(Title, Desc, InitialValue, Callback)
+        return self:AddToggle(Tab, Title, Desc, InitialValue, Callback)
+    end
+    
+    return Tab
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 7/20: SLIDERS
 -- ====================================================================================== --
 
 -- ID: G1 - ADICIONANDO SLIDERS ÀS ABAS
 function rareLib:AddSlider(Tab, Title, Desc, Min, Max, Default, Callback)
-    local Theme = self.Themes[self.Save.Theme]
-    local Frame = CreateOptionFrame(Tab.Container, Title, Desc, 120)
+    local Theme = self.Theme
+    local Frame = self:__CreateOptionFrame(Tab.Container, Title, Desc, 120)
     local CurrentValue = Default or Min
     
     local SliderHolder = Create("Frame", {
@@ -439,41 +502,36 @@ function rareLib:AddSlider(Tab, Title, Desc, Min, Max, Default, Callback)
         local percentage = (CurrentValue - Min) / (Max - Min)
         ValueLabel.Text = string.format("%.0f", CurrentValue)
         
-        local tweenInfo = isInstant and nil or TweenInfo.new(0.1)
-        if tweenInfo then
-            TweenService:Create(Knob, tweenInfo, {Position = UDim2.fromScale(percentage, 0.5)}):Play()
-            TweenService:Create(Indicator, tweenInfo, {Size = UDim2.fromScale(percentage, 1)}):Play()
-        else
-            Knob.Position = UDim2.fromScale(percentage, 0.5)
-            Indicator.Size = UDim2.fromScale(percentage, 1)
-        end
+        local info = isInstant and TweenInfo.new(0) or TweenInfo.new(0.1)
+        TweenService:Create(Knob, info, {Position = UDim2.fromScale(percentage, 0.5)}):Play()
+        TweenService:Create(Indicator, info, {Size = UDim2.fromScale(percentage, 1)}):Play()
+
         pcall(Callback, CurrentValue)
     end
 
     local Dragger = Create("TextButton", {
-        Parent = SliderBar, Size = UDim2.new(1, 0, 3, 0), Position = UDim2.new(0.5, 0, 0.5, 0),
+        Parent = SliderBar, Size = UDim2.new(1, 10, 3, 0), Position = UDim2.new(0.5, 0, 0.5, 0),
         AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Text = ""
     })
 
     local isDragging = false
-    local function HandleInput(input)
-        local percentage = (input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X
-        percentage = math.clamp(percentage, 0, 1)
-        local newValue = math.floor((percentage * (Max - Min)) + Min + 0.5)
-        UpdateSlider(newValue)
-    end
-
     Dragger.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             isDragging = true
             Tab.Container.ScrollingEnabled = false
-            HandleInput(input)
+            local pos = input.Position.X - SliderBar.AbsolutePosition.X
+            local percentage = math.clamp(pos / SliderBar.AbsoluteSize.X, 0, 1)
+            local newValue = math.floor((percentage * (Max - Min)) + Min + 0.5)
+            UpdateSlider(newValue)
         end
     end)
     
     UserInputService.InputChanged:Connect(function(input)
         if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            HandleInput(input)
+            local pos = input.Position.X - SliderBar.AbsolutePosition.X
+            local percentage = math.clamp(pos / SliderBar.AbsoluteSize.X, 0, 1)
+            local newValue = math.floor((percentage * (Max - Min)) + Min + 0.5)
+            UpdateSlider(newValue)
         end
     end)
 
@@ -488,19 +546,31 @@ function rareLib:AddSlider(Tab, Title, Desc, Min, Max, Default, Callback)
 
     return {
         Frame = Frame,
-        SetValue = function(newValue) UpdateSlider(newValue) end,
+        SetValue = UpdateSlider,
         GetValue = function() return CurrentValue end
     }
 end
+
+-- ID: G2 - ATUALIZANDO A API DA ABA
+local OriginalTab_G = rareLib.CreateTab
+function rareLib:CreateTab(TName, TIcon)
+    local Tab = OriginalTab_G(self, TName, TIcon)
+    
+    Tab.AddSlider = function(Title, Desc, Min, Max, Default, Callback)
+        return self:AddSlider(Tab, Title, Desc, Min, Max, Default, Callback)
+    end
+    
+    return Tab
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
--- [ ! ] - PARTE 8/20: DROPDOWNS
+-- [ 🐉 ]- RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
+-- [ ! ]- PARTE 8/20: DROPDOWNS
 -- ====================================================================================== --
 
 -- ID: H1 - ADICIONANDO DROPDOWNS ÀS ABAS
 function rareLib:AddDropdown(Tab, Title, Desc, Options, DefaultOption, Callback)
-    local Theme = self.Themes[self.Save.Theme]
-    local Frame = CreateOptionFrame(Tab.Container, Title, Desc, 140)
+    local Theme = self.Theme
+    local Frame = self:__CreateOptionFrame(Tab.Container, Title, Desc, 140)
     local SelectedValue = DefaultOption or Options[1]
     local DropdownVisible = false
 
@@ -522,7 +592,7 @@ function rareLib:AddDropdown(Tab, Title, Desc, Options, DefaultOption, Callback)
     })
     
     local Overlay = Create("Frame", {
-        Parent = self.Window.MainGui, Size = UDim2.new(1, 0, 1, 0),
+        Parent = self.MainGui, Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, ZIndex = 3, Visible = false
     })
     
@@ -545,7 +615,7 @@ function rareLib:AddDropdown(Tab, Title, Desc, Options, DefaultOption, Callback)
             local listHeight = ListPanel.CanvasSize.Y.Offset + 10
             local targetHeight = math.min(listHeight, 150)
             local x, y = pos.X, pos.Y + DropdownButton.AbsoluteSize.Y
-            if y + targetHeight > self.Window.MainGui.AbsoluteSize.Y then y = pos.Y - targetHeight end
+            if y + targetHeight > self.MainGui.AbsoluteSize.Y then y = pos.Y - targetHeight end
             
             ListPanel.Position = UDim2.fromOffset(x, y)
             TweenService:Create(ListPanel, TweenInfo.new(0.2), {Size = UDim2.new(0, 130, 0, targetHeight)}):Play()
@@ -579,15 +649,27 @@ function rareLib:AddDropdown(Tab, Title, Desc, Options, DefaultOption, Callback)
 
     return { Frame = Frame, SetValue = SelectOption, GetValue = function() return SelectedValue end }
 end
+
+-- ID: H2 - ATUALIZANDO A API DA ABA
+local OriginalTab_H = rareLib.CreateTab
+function rareLib:CreateTab(TName, TIcon)
+    local Tab = OriginalTab_H(self, TName, TIcon)
+    
+    Tab.AddDropdown = function(Title, Desc, Options, DefaultOption, Callback)
+        return self:AddDropdown(Tab, Title, Desc, Options, DefaultOption, Callback)
+    end
+    
+    return Tab
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 9/20: TEXTBOXES
 -- ====================================================================================== --
 
 -- ID: I1 - ADICIONANDO TEXTBOXES ÀS ABAS
 function rareLib:AddTextbox(Tab, Title, Desc, Placeholder, Callback)
-    local Theme = self.Themes[self.Save.Theme]
-    local Frame = CreateOptionFrame(Tab.Container, Title, Desc, 140)
+    local Theme = self.Theme
+    local Frame = self:__CreateOptionFrame(Tab.Container, Title, Desc, 140)
 
     local TextboxFrame = Track(Create("Frame", {
         Parent = Frame, Size = UDim2.new(0, 130, 0, 22),
@@ -601,13 +683,18 @@ function rareLib:AddTextbox(Tab, Title, Desc, Placeholder, Callback)
         Text = "", PlaceholderText = Placeholder or "...", PlaceholderColor3 = Theme["Color Dark Text"],
         TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false
     }), "Text")
+    
+    local Stroke = Create("UIStroke", { Parent = TextboxFrame, ApplyStrokeMode = "Border", Color = Theme["Color Theme"], Thickness = 0, Enabled = false })
 
     Textbox.FocusGained:Connect(function()
-        TweenService:Create(TextboxFrame, TweenInfo.new(0.2), {BorderColor3 = Theme["Color Theme"], BorderSizePixel = 1}):Play()
+        Stroke.Enabled = true
+        TweenService:Create(Stroke, TweenInfo.new(0.2), { Thickness = 1 }):Play()
     end)
     
     Textbox.FocusLost:Connect(function(enterPressed)
-        TweenService:Create(TextboxFrame, TweenInfo.new(0.2), {BorderColor3 = Color3.fromRGB(0,0,0), BorderSizePixel = 0}):Play()
+        TweenService:Create(Stroke, TweenInfo.new(0.2), { Thickness = 0 }):Play()
+        task.wait(0.2)
+        Stroke.Enabled = false
         if enterPressed and Textbox.Text:gsub("%s", "") ~= "" then
             pcall(Callback, Textbox.Text)
         end
@@ -619,18 +706,29 @@ function rareLib:AddTextbox(Tab, Title, Desc, Placeholder, Callback)
         GetText = function() return Textbox.Text end,
     }
 end
+
+-- ID: I2 - ATUALIZANDO A API DA ABA
+local OriginalTab_I = rareLib.CreateTab
+function rareLib:CreateTab(TName, TIcon)
+    local Tab = OriginalTab_I(self, TName, TIcon)
+    
+    Tab.AddTextbox = function(Title, Desc, Placeholder, Callback)
+        return self:AddTextbox(Tab, Title, Desc, Placeholder, Callback)
+    end
+    
+    return Tab
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
 -- [ ! ] - PARTE 10/20: A CONSTELAÇÃO
 -- ====================================================================================== --
 
 -- ID: J1 - O CONSTRUTOR DO EFEITO DE PARTÍCULAS
-function rareLib:CreateConstellation()
-    local Theme = self.Themes[self.Save.Theme]
-    local MainFrame = self.Window.MainFrame
-
+function rareLib:__CreateConstellation()
+    local Theme = self.Theme
+    
     local particleFrame = Create("Frame", {
-        Parent = MainFrame, Size = UDim2.new(1, 0, 1, 0),
+        Parent = self.MainFrame, Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, ZIndex = 0
     })
     
@@ -645,16 +743,16 @@ function rareLib:CreateConstellation()
         Create("UICorner", {Parent = p, CornerRadius = UDim.new(1, 0)})
         table.insert(particles, {
             gui = p,
-            pos = Vector2.new(math.random(0, MainFrame.AbsoluteSize.X), math.random(0, MainFrame.AbsoluteSize.Y)),
+            pos = Vector2.new(math.random(0, self.MainFrame.AbsoluteSize.X), math.random(0, self.MainFrame.AbsoluteSize.Y)),
             vel = Vector2.new(math.random(-20, 20), math.random(-20, 20))
         })
     end
 
     local connection = RunService.RenderStepped:Connect(function(dt)
-        if not MainFrame or not MainFrame.Parent then connection:Disconnect() return end
+        if not self.MainGui or not self.MainGui.Parent then connection:Disconnect() return end
         for _, line in ipairs(lines) do line:Destroy() end; lines = {}
         
-        local size = MainFrame.AbsoluteSize
+        local size = self.MainFrame.AbsoluteSize
         if size.X == 0 then return end
 
         for i, p1 in ipairs(particles) do
@@ -667,62 +765,49 @@ function rareLib:CreateConstellation()
                 local p2 = particles[j]
                 local dist = (p1.pos - p2.pos).Magnitude
                 if dist < connectDistance then
-                    local line = Create("Frame", {
+                    table.insert(lines, Create("Frame", {
                         Parent = particleFrame, Size = UDim2.new(0, dist, 0, 1),
                         Position = UDim2.fromOffset((p1.pos.X + p2.pos.X) / 2, (p1.pos.Y + p2.pos.Y) / 2),
                         Rotation = math.deg(math.atan2(p2.pos.Y - p1.pos.Y, p2.pos.X - p1.pos.X)),
                         BackgroundColor3 = Theme["Color Theme"], BorderSizePixel = 0, ZIndex = 0,
                         BackgroundTransparency = 1 - (1 - dist / connectDistance) * 0.8,
-                    })
-                    table.insert(lines, line)
+                    }))
                 end
             end
         end
     end)
 end
+
+-- ID: J2 - ATUALIZANDO O CONSTRUTOR PRINCIPAL
+local OriginalNew_J = rareLib.new
+function rareLib:new(Title, IconURL)
+    local self = OriginalNew_J(self, Title, IconURL)
+
+    self:__CreateConstellation() -- Ativa as partículas na inicialização
+
+    return self
+end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V3 - by RARO XT & DRIP
--- [ ! ] - PARTE 11/20: FINALIZAÇÃO
+-- [ 🐉 ] - RARE LIB V4 - A PROVA DE FALHAS - by RARO XT & DRIP
+-- [ ! ] - PARTE 11/20: O PACOTE FINAL
 -- ====================================================================================== --
 
--- ID: K1 - O EMPACOTADOR
--- Essa função vai juntar todas as peças que a gente construiu
-function rareLib:Init(Title, IconURL)
-    -- Cria a janela principal e armazena a referência
-    self:CreateWindow(Title, IconURL)
-    
-    -- Popula a janela com a ficha de status
-    self:CreateStatusFicha()
-    
-    -- Ativa o efeito de partículas no fundo
-    self:CreateConstellation()
-    
-    -- Retorna a API final para o usuário poder criar abas e componentes
-    local UserAPI = {
-        Window = self.Window,
-        CreateTab = function(TName, TIcon)
-            return self:CreateTab(TName, TIcon)
-        end,
-        -- Adicionando um atalho direto pra criar componentes na última aba criada
-        AddButton = function(...)
-            if self.CurrentTab then return self:AddButton(self.CurrentTab, ...) end
-        end,
-        AddToggle = function(...)
-            if self.CurrentTab then return self:AddToggle(self.CurrentTab, ...) end
-        end,
-        AddSlider = function(...)
-            if self.CurrentTab then return self:AddSlider(self.CurrentTab, ...) end
-        end,
-        AddDropdown = function(...)
-            if self.CurrentTab then return self:AddDropdown(self.CurrentTab, ...) end
-        end,
-        AddTextbox = function(...)
-            if self.CurrentTab then return self:AddTextbox(self.CurrentTab, ...) end
-        end
-    }
-    
-    return UserAPI
-end
+-- ID: K1 - FINALIZANDO O OBJETO RARELIB
+-- Aqui a gente limpa e organiza a tabela principal antes de entregar pro usuário
+
+-- Remove as funções "privadas" para que o usuário não possa chamá-las
+rareLib.__CreateWindow = nil
+rareLib.__CreateStatusFicha = nil
+rareLib.__CreateConstellation = nil
+rareLib.__CreateOptionFrame = nil
+
+-- Remove os construtores de componentes, eles só são usados pela API da Tab
+rareLib.AddButton = nil
+rareLib.AddToggle = nil
+rareLib.AddSlider = nil
+rareLib.AddDropdown = nil
+rareLib.AddTextbox = nil
 
 -- ID: K2 - O FIM DA LIB
+-- A única coisa que o usuário precisa é a função :new() pra começar tudo.
 return rareLib
