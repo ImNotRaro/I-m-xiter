@@ -144,20 +144,20 @@ function rareLib:__buildBaseUI()
     -- >>> ADICIONE ESTE BLOCO <<<
     -- ID: C2.5 - O FUNDO VERDADEIRO
     -- Este frame vai segurar a constelação e garantir que nada fique na frente.
-    self.BackgroundFrame = pCreate("Frame", {
+       self.BackgroundFrame = pCreate("Frame", {
         Parent = self.MainFrame,
         Name = "Background",
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Theme["Color Hub BG"],
+        BackgroundColor3 = Theme["Color Hub BG"], -- <<< GARANTA QUE ESSA LINHA ESTEJA CORRETA
         BorderSizePixel = 0,
-        ZIndex = 1 -- O mais baixo de todos
+        ZIndex = 1
     })
     pCreate("UICorner", {Parent = self.BackgroundFrame, CornerRadius = UDim.new(0, 6)})
     
     -- Painel de Navegação (Esquerda)
     self.NavContainer = pCreate("ScrollingFrame", {
         Parent = self.MainFrame, Name = "NavContainer", Size = UDim2.new(0, TabSize, 1, 0),
-        BackgroundColor3 = Theme["Color Hub BG"], BorderSizePixel = 0, AutomaticCanvasSize = "Y",
+        BackgroundColor3 = Theme["Color Hub BG"], BackgroundTransparency = 1, BorderSizePixel = 0, AutomaticCanvasSize = "Y",
         ScrollBarImageColor3 = Theme["Color Theme"], ScrollBarThickness = 6
     })
     pCreate("UICorner", {Parent = self.NavContainer, CornerRadius = UDim.new(0, 6)})
@@ -167,7 +167,7 @@ function rareLib:__buildBaseUI()
     -- Painel de Status (Direita)
     self.RightPanel = pCreate("Frame", {
         Parent = self.MainFrame, Name = "RightPanel", Size = UDim2.new(0, 200, 1, 0),
-        Position = UDim2.new(1, -200, 0, 0), BackgroundColor3 = Theme["Color Panel BG"], BorderSizePixel = 0
+        Position = UDim2.new(1, -200, 0, 0), BackgroundColor3 = Theme["Color Panel BG"], BackgroundTransparency = 1, BorderSizePixel = 0
     })
     pCreate("UICorner", {Parent = self.RightPanel, CornerRadius = UDim.new(0, 6)})
     pCreate("UIPadding", {Parent = self.RightPanel, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
@@ -175,7 +175,9 @@ function rareLib:__buildBaseUI()
     -- Painel de Conteúdo (Centro)
     self.ContentPanel = pCreate("Frame", {
         Parent = self.MainFrame, Name = "ContentPanel", Size = UDim2.new(1, -(TabSize + 10 + 200), 1, 0),
-        Position = UDim2.new(0, TabSize + 10, 0, 0), BackgroundColor3 = Theme["Color Hub BG"], BorderSizePixel = 0
+        Position = UDim2.new(0, TabSize + 10, 0, 0), BackgroundColor3 = Theme["Color Hub BG"], -- MANTÉM, MAS...
+        BackgroundTransparency = 1, -- <<< ADICIONE ESSA LINHA
+        BorderSizePixel = 0, ZIndex = 2
     })
     pCreate("UICorner", {Parent = self.ContentPanel, CornerRadius = UDim.new(0, 6)})
 end
@@ -392,10 +394,10 @@ function rareLib:AddButton(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V5 - A VERSÃO FINAL - by RARO XT & DRIP
--- [ ! ] - PARTE 7/20: TOGGLES (CORRIGIDA)
+-- [ ! ] - PARTE 7/20: TOGGLES (CORREÇÃO FINAL)
 -- ====================================================================================== --
 
--- ID: G1 - A API PÚBLICA PARA CRIAR TOGGLES (REESCRITA E À PROVA DE BALAS)
+-- ID: G1 - A API PÚBLICA PARA CRIAR TOGGLES (LÓGICA DE POSIÇÃO REFEITA)
 function rareLib:AddToggle(options)
     local Theme = self.Theme
     local Frame = self:__createOptionFrame(self.Container, options.Title, options.Desc, 40)
@@ -407,20 +409,22 @@ function rareLib:AddToggle(options)
         Text = "", AutoButtonColor = false
     })
     pCreate("UICorner", {Parent = ToggleButton, CornerRadius = UDim.new(1, 0)})
-    -- Adicionando um UIPadding pra segurar a bolinha
-    pCreate("UIPadding", {Parent = ToggleButton, PaddingLeft = UDim.new(0, 2), PaddingRight = UDim.new(0, 2)})
     
     local Knob = pCreate("Frame", {
         Parent = ToggleButton, Name = "Knob", Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(0, 0, 0.5, -8), -- Posição inicial corrigida
+        -- CORREÇÃO: AnchorPoint e Posição agora trabalham juntos para um alinhamento perfeito.
+        AnchorPoint = Vector2.new(0.5, 0.5), -- O ponto de referência é o CENTRO da bolinha.
+        Position = UDim2.new(0, 10, 0.5, 0), -- Posição inicial (10 pixels da borda esquerda, centralizado na vertical)
         BackgroundColor3 = Theme["Color Dark Text"], BorderSizePixel = 0
     })
     pCreate("UICorner", {Parent = Knob, CornerRadius = UDim.new(1, 0)})
     
     local function UpdateKnob(newState, isInstant)
         state = newState
-        -- CORREÇÃO: A posição agora é baseada em Scale (0 para esquerda, 1 para direita), o UIPadding segura ela na margem.
-        local targetPos = newState and UDim2.new(1, 0, 0.5, -8) or UDim2.new(0, 0, 0.5, -8)
+        -- CORREÇÃO: A posição final agora é calculada usando o tamanho do botão.
+        -- Posição ON: Largura total (35) - metade do Knob (8) - padding (2) = 25
+        -- Posição OFF: Metade do Knob (8) + padding (2) = 10
+        local targetPos = newState and UDim2.new(0, 25, 0.5, 0) or UDim2.new(0, 10, 0.5, 0)
         local targetColor = newState and Theme["Color Theme"] or Theme["Color Dark Text"]
         
         if isInstant then
@@ -432,7 +436,6 @@ function rareLib:AddToggle(options)
     end
     
     ToggleButton.MouseButton1Click:Connect(function()
-        -- CORREÇÃO: A lógica agora atualiza o estado ANTES de chamar o callback.
         local newState = not state
         UpdateKnob(newState)
         pcall(options.Callback, newState)
