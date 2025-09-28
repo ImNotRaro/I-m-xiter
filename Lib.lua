@@ -625,10 +625,10 @@ function rareLib:AddDropdown(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V5 - A VERSÃO FINAL - by RARO XT & DRIP
--- [ ! ] - PARTE 10/20: TEXTBOXES
+-- [ ! ] - PARTE 10/20: TEXTBOXES (CORRIGIDA)
 -- ====================================================================================== --
 
--- ID: J1 - A API PÚBLICA PARA CRIAR TEXTBOXES
+-- ID: J1 - A API PÚBLICA PARA CRIAR TEXTBOXES (REESCRITA E À PROVA DE BALAS)
 function rareLib:AddTextbox(options)
     local Theme = self.Theme
     local Placeholder, Callback = options.Placeholder or "...", options.Callback
@@ -649,18 +649,17 @@ function rareLib:AddTextbox(options)
     
     local Stroke = pCreate("UIStroke", { Parent = TextboxFrame, ApplyStrokeMode = "Border", Color = Theme["Color Theme"], Thickness = 0, Enabled = false })
 
-    Textbox.FocusGained:Connect(function()
+    -- CORREÇÃO: O evento foi corrigido de 'FocusGained' para 'Focused'.
+    Textbox.Focused:Connect(function()
         Stroke.Enabled = true
         TweenService:Create(Stroke, TweenInfo.new(0.2), { Thickness = 1 }):Play()
     end)
     
     Textbox.FocusLost:Connect(function(enterPressed)
         TweenService:Create(Stroke, TweenInfo.new(0.2), { Thickness = 0 }):Play()
-        -- Pequeno delay pra animação terminar antes de desativar o Stroke
         task.delay(0.2, function()
             Stroke.Enabled = false
         end)
-        -- O callback só roda se o cara apertar Enter E o texto não for só espaço em branco.
         if enterPressed and Textbox.Text:gsub("%s", "") ~= "" then
             pcall(Callback, Textbox.Text)
         end
