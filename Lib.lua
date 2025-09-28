@@ -139,8 +139,20 @@ function rareLib:__buildBaseUI()
     ToggleButton.MouseButton1Click:Connect(function() self.MainFrame.Visible = not self.MainFrame.Visible end)
     pMakeDrag(ToggleButton)
 
-    -- Padding geral
     pCreate("UIPadding", {Parent = self.MainFrame, PaddingLeft=UDim.new(0,10), PaddingRight=UDim.new(0,10), PaddingTop=UDim.new(0,10), PaddingBottom=UDim.new(0,10)})
+    
+    -- >>> ADICIONE ESTE BLOCO <<<
+    -- ID: C2.5 - O FUNDO VERDADEIRO
+    -- Este frame vai segurar a constelação e garantir que nada fique na frente.
+    self.BackgroundFrame = pCreate("Frame", {
+        Parent = self.MainFrame,
+        Name = "Background",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Theme["Color Hub BG"],
+        BorderSizePixel = 0,
+        ZIndex = 1 -- O mais baixo de todos
+    })
+    pCreate("UICorner", {Parent = self.BackgroundFrame, CornerRadius = UDim.new(0, 6)})
     
     -- Painel de Navegação (Esquerda)
     self.NavContainer = pCreate("ScrollingFrame", {
@@ -380,10 +392,10 @@ function rareLib:AddButton(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V5 - A VERSÃO FINAL - by RARO XT & DRIP
--- [ ! ] - PARTE 7/20: TOGGLES
+-- [ ! ] - PARTE 7/20: TOGGLES (CORRIGIDA)
 -- ====================================================================================== --
 
--- ID: G1 - A API PÚBLICA PARA CRIAR TOGGLES
+-- ID: G1 - A API PÚBLICA PARA CRIAR TOGGLES (REESCRITA E À PROVA DE BALAS)
 function rareLib:AddToggle(options)
     local Theme = self.Theme
     local Frame = self:__createOptionFrame(self.Container, options.Title, options.Desc, 40)
@@ -395,16 +407,20 @@ function rareLib:AddToggle(options)
         Text = "", AutoButtonColor = false
     })
     pCreate("UICorner", {Parent = ToggleButton, CornerRadius = UDim.new(1, 0)})
+    -- Adicionando um UIPadding pra segurar a bolinha
+    pCreate("UIPadding", {Parent = ToggleButton, PaddingLeft = UDim.new(0, 2), PaddingRight = UDim.new(0, 2)})
     
     local Knob = pCreate("Frame", {
         Parent = ToggleButton, Name = "Knob", Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = Theme["Color Dark Text"], BorderSizePixel = 0
+        Position = UDim2.new(0, 0, 0.5, -8), -- Posição inicial corrigida
+        BackgroundColor3 = Theme["Color Dark Text"], BorderSizePixel = 0
     })
     pCreate("UICorner", {Parent = Knob, CornerRadius = UDim.new(1, 0)})
     
     local function UpdateKnob(newState, isInstant)
         state = newState
-        local targetPos = newState and UDim2.new(1, -2, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+        -- CORREÇÃO: A posição agora é baseada em Scale (0 para esquerda, 1 para direita), o UIPadding segura ela na margem.
+        local targetPos = newState and UDim2.new(1, 0, 0.5, -8) or UDim2.new(0, 0, 0.5, -8)
         local targetColor = newState and Theme["Color Theme"] or Theme["Color Dark Text"]
         
         if isInstant then
@@ -416,8 +432,10 @@ function rareLib:AddToggle(options)
     end
     
     ToggleButton.MouseButton1Click:Connect(function()
-        UpdateKnob(not state)
-        pcall(options.Callback, not state)
+        -- CORREÇÃO: A lógica agora atualiza o estado ANTES de chamar o callback.
+        local newState = not state
+        UpdateKnob(newState)
+        pcall(options.Callback, newState)
     end)
     
     UpdateKnob(state, true)
