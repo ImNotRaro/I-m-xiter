@@ -727,3 +727,88 @@ end
 
 -- ID: K3 - O FIM DA LIB. RETORNANDO O OBJETO PRINCIPAL.
 return rareLib
+-- ====================================================================================== --
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 12/20: A CHEGADA DO IMPERADOR
+-- ====================================================================================== --
+
+-- ID: L1 - A FUNÇÃO "PRIVADA" PARA CRIAR A ANIMAÇÃO DE ENTRADA
+function rareLib:__buildIntroAnimation()
+    -- Esconde a UI principal pra animação rolar primeiro.
+    self.MainFrame.Visible = false
+    
+    local LogoText = pCreate("TextLabel", {
+        Parent = self.MainGui,
+        Name = "IntroLogo",
+        Text = "RARE HUB",
+        Font = Enum.Font.GothamBlack,
+        TextSize = 80,
+        TextColor3 = self.Theme["Color Text"],
+        -- Começa fora da tela, lá em cima.
+        Position = UDim2.new(0.5, 0, -0.2, 0),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundTransparency = 1,
+        ZIndex = 100 -- Fica na frente de tudo.
+    })
+    
+    -- Efeito de sombra no texto pra dar profundidade.
+    pCreate("TextStroke", {
+        Parent = LogoText,
+        Color = self.Theme["Color Theme"],
+        Thickness = 2,
+        Transparency = 0
+    })
+
+    -- A MÁGICA DO TWEENSERVICE
+
+    -- 1. Texto desce até o meio da tela.
+    local tweenInfoIn = TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    local tweenIn = TweenService:Create(LogoText, tweenInfoIn, {Position = UDim2.new(0.5, 0, 0.5, 0)})
+
+    -- 2. Texto fica parado por um momento.
+    -- (A gente vai usar task.wait() pra isso)
+
+    -- 3. Texto sobe e some.
+    local tweenInfoOut = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local tweenOut = TweenService:Create(LogoText, tweenInfoOut, {Position = UDim2.new(0.5, 0, -0.2, 0), TextTransparency = 1})
+    
+    -- 4. A UI principal aparece com um fade in.
+    self.MainFrame.CanvasGroup.BackgroundTransparency = 1 -- Começa invisível
+    local tweenUI = TweenService:Create(self.MainFrame.CanvasGroup, TweenInfo.new(0.5), {BackgroundTransparency = 0})
+
+    -- Executando a sequência
+    task.spawn(function()
+        tweenIn:Play()
+        tweenIn.Completed:Wait() -- Espera a primeira animação terminar
+
+        task.wait(0.7) -- Pausa dramática
+
+        tweenOut:Play()
+        tweenOut.Completed:Wait() -- Espera o texto sumir
+        
+        LogoText:Destroy() -- Limpa o lixo
+
+        -- Mostra a UI e executa o fade in.
+        self.MainFrame.Visible = true
+        tweenUI:Play()
+    end)
+end
+
+-- ID: L2 - ATUALIZANDO O CONSTRUTOR MESTRE
+local OriginalNew_L = rareLib.new
+function rareLib:new(Title)
+    -- Antes de construir a janela, a gente precisa de um CanvasGroup pra controlar a transparência dela.
+    -- Então, a gente precisa interceptar a criação do MainFrame.
+    
+    local Hub = OriginalNew_L(self, Title)
+    
+    -- Adiciona um CanvasGroup no MainFrame. É a forma mais otimizada de fazer fade in/out.
+    pCreate("CanvasGroup", {
+        Parent = Hub.MainFrame
+    })
+
+    -- Chama a função pra construir e rodar a animação.
+    Hub:__buildIntroAnimation()
+
+    return Hub
+end
