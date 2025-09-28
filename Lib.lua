@@ -694,20 +694,26 @@ function rareLib:AddTextbox(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V5 - A VERSÃO FINAL - by RARO XT & DRIP
--- [ ! ] - PARTE 11/20: A CONSTELAÇÃO E O PACOTE FINAL
+-- [ ! ] - PARTE 11/20: A CONSTELAÇÃO (CORREÇÃO FINAL)
 -- ====================================================================================== --
 
--- ID: K1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR O EFEITO DE PARTÍCULAS
+-- ID: K1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR O EFEITO DE PARTÍCULAS (REESCRITA)
 function rareLib:__buildConstellation()
     local Theme = self.Theme
     
     local particleFrame = pCreate("Frame", {
-        Parent = self.MainFrame, Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1, ZIndex = 0
+        Parent = self.BackgroundFrame,
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1, 
+        ZIndex = 2
     })
     
     local particles, lines = {}, {}
     local numParticles, connectDistance = 50, 120
+
+    -- Pequeno delay pra garantir que o frame tenha o tamanho renderizado certo
+    task.wait() 
+    local frameSize = particleFrame.AbsoluteSize
 
     for i = 1, numParticles do
         local p = pCreate("Frame", {
@@ -717,7 +723,8 @@ function rareLib:__buildConstellation()
         pCreate("UICorner", {Parent = p, CornerRadius = UDim.new(1, 0)})
         table.insert(particles, {
             gui = p,
-            pos = Vector2.new(math.random(0, self.MainFrame.AbsoluteSize.X), math.random(0, self.MainFrame.AbsoluteSize.Y)),
+            -- CORREÇÃO: A posição inicial agora é baseada no tamanho do particleFrame, não do MainFrame.
+            pos = Vector2.new(math.random(0, frameSize.X), math.random(0, frameSize.Y)),
             vel = Vector2.new(math.random(-20, 20), math.random(-20, 20))
         })
     end
@@ -726,25 +733,26 @@ function rareLib:__buildConstellation()
         if not self.MainGui or not self.MainGui.Parent then connection:Disconnect() return end
         for _, line in ipairs(lines) do line:Destroy() end; lines = {}
         
-        local size = self.MainFrame.AbsoluteSize
-        if size.X == 0 then return end
+        -- CORREÇÃO: O limite de movimento agora é o tamanho do particleFrame.
+        local currentSize = particleFrame.AbsoluteSize
+        if currentSize.X == 0 then return end
 
         for i, p1 in ipairs(particles) do
             p1.pos = p1.pos + p1.vel * dt
-            if p1.pos.X < 0 or p1.pos.X > size.X then p1.vel = Vector2.new(-p1.vel.X, p1.vel.Y) end
-            if p1.pos.Y < 0 or p1.pos.Y > size.Y then p1.vel = Vector2.new(p1.vel.X, -p1.vel.Y) end
+            if p1.pos.X < 0 or p1.pos.X > currentSize.X then p1.vel = Vector2.new(-p1.vel.X, p1.vel.Y) end
+            if p1.pos.Y < 0 or p1.pos.Y > currentSize.Y then p1.vel = Vector2.new(p1.vel.X, -p1.vel.Y) end
             p1.gui.Position = UDim2.fromOffset(p1.pos.X, p1.pos.Y)
             
             for j = i + 1, #particles do
                 local p2 = particles[j]
                 local dist = (p1.pos - p2.pos).Magnitude
-if dist < connectDistance then
+                if dist < connectDistance then
                     table.insert(lines, pCreate("Frame", {
-                        Parent = particleFrame, Size = UDim2.new(0, dist, 0, 2), -- <<< LINHA NOVA (MAIS GROSSA)
+                        Parent = particleFrame, Size = UDim2.new(0, dist, 0, 2),
                         Position = UDim2.fromOffset((p1.pos.X + p2.pos.X) / 2, (p1.pos.Y + p2.pos.Y) / 2),
                         Rotation = math.deg(math.atan2(p2.pos.Y - p1.pos.Y, p2.pos.X - p1.pos.X)),
                         BackgroundColor3 = Theme["Color Theme"], BorderSizePixel = 0, ZIndex = 0,
-                        BackgroundTransparency = 1 - (1 - dist / connectDistance) * 0.6, -- <<< LINHA NOVA (MENOS TRANSPARENTE)
+                        BackgroundTransparency = 1 - (1 - dist / connectDistance) * 0.6,
                     }))
                 end
             end
