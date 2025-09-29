@@ -1470,15 +1470,36 @@ end
 
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP - by RARO XT & DRIP
--- [ ! ] - PARTES 16/20 A 19/20: RESERVADAS PARA FUTUROS COMPONENTES AVANÇADOS (PULL REQUESTS)
--- ====================================================================================== --
--- O espaço está reservado, a V7 é modular e preparada para o futuro!
-
-
--- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP - by RARO XT & DRIP
--- [ ! ] - PARTE 20/20: O FIM DA LIB. RETORNANDO O OBJETO PRINCIPAL.
+-- [ ! ] - PARTE 16/20: REMOÇÃO DA ANIMAÇÃO DE ENTRADA (CORREÇÃO DE BUG CRÍTICO "Scale")
 -- ====================================================================================== --
 
--- ID: Z1 - O GRANDE FINAL!
-return rareLib
+-- ID: P1 - FUNÇÃO DE ANIMAÇÃO DE ENTRADA (AGORA NULA)
+-- REMOVIDO: O erro "Scale is not a valid member of CanvasGroup" foi um vexame!
+function rareLib:__animateIn()
+    -- Ajusta o CanvasGroup para o estado final imediatamente, sem animação.
+    -- O CanvasGroup começa no centro do MainFrame (Parte 2/20), mas com AnchorPoint(0.5, 0.5)
+    -- e o Size zerado para o Scale.
+    
+    -- RESTAURAÇÃO DO CANVASGROUP PARA O ESTADO PADRÃO:
+    self.CanvasGroup.AnchorPoint = Vector2.new(0, 0) -- De volta ao topo-esquerda
+    
+    -- Reposiciona para compensar a mudança do AnchorPoint
+    local TitleBarHeight = 28 
+    self.CanvasGroup.Position = UDim2.new(0, 0, 0, TitleBarHeight)
+    
+    self.CanvasGroup.Scale = 1 -- Garante que a escala esteja em 1 (se a propriedade for adicionada futuramente, estará correta)
+    self.CanvasGroup.GroupTransparency = 0 -- Torna visível imediatamente
+    self.CanvasGroup.Visible = true 
+end
+
+-- ID: P2 - ATUALIZANDO O CONSTRUTOR MESTRE (APENAS O PATCH NECESSÁRIO)
+-- RE-OVERRIDE do Hub:new para usar a nova __animateIn
+local OriginalNew_P = rareLib.new
+function rareLib:new(options)
+    local Hub = OriginalNew_P(self, options)
+
+    -- A chamada para Hub:__buildConstellation() (Parte 3/20) se mantém
+    Hub:__animateIn() -- Chama a versão NULA/CORRIGIDA
+
+    return Hub
+end
