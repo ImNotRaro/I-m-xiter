@@ -1,13 +1,13 @@
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 1/20: A FUNDAÇÃO INABALÁVEL (ALICERCE V7)
 -- ====================================================================================== --
 
 -- ID: A1 - O MOLDE (A "CLASSE" RARELIB)
 local rareLib = {}
-rareLib.__index = rareLib
+rareLib.__index = rareLib 
 rareLib.Tab = {}
-rareLib.Tab.__index = rareLib 
+rareLib.Tab.__index = rareLib -- Tab herda de rareLib (MANDAMENTO DA ARQUITETURA __index)
 
 -- ID: A2 - ARSENAL DE SERVIÇOS
 local CoreGui = game:GetService("CoreGui")
@@ -15,9 +15,10 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local PlayerGui = Players.LocalPlayer.PlayerGui 
+local Workspace = game:GetService("Workspace")
+local PlayerGui = Players.LocalPlayer.PlayerGui -- Uso do PlayerGui para o exploit
 
--- ID: A3 - FUNÇÃO DE CRIAÇÃO BÁSICA (NOSSA FÁBRICA)
+-- ID: A3 - FUNÇÃO DE CRIAÇÃO BÁSICA (A NOSSA FÁBRICA)
 local function pCreate(instanceType, properties)
     local newInstance = Instance.new(instanceType)
     if properties then
@@ -29,39 +30,13 @@ local function pCreate(instanceType, properties)
 end
 rareLib.pCreate = pCreate
 
--- ID: A4 - FUNÇÃO DE ARRASTAR (MOBILE SOBERANO)
-local function pMakeDrag(instance, dragHandle)
-    local isDragging, dragStart, startPos = false, Vector2.new(), UDim2.new()
-    local Handle = dragHandle or instance 
-    
-    Handle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isDragging, startPos, dragStart = true, instance.Position, input.Position
-            UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            instance.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
-            isDragging = false 
-            UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-        end
-    end)
-end
-rareLib.pMakeDrag = pMakeDrag
-
--- ID: A5 - FUNÇÃO P/ CHAMADA SEGURA (pcall SAGRADO)
+-- ID: A4 - FUNÇÃO P/ CHAMADA SEGURA (pcall SAGRADO)
 function rareLib:pcall(...)
     return pcall(...)
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
--- [ ! ] - PARTE 2/20: CONSTRUTOR E JANELA PRINCIPAL (REFORMADA COMPLETA E GARANTIDA)
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
+-- [ ! ] - PARTE 2/20: CONSTRUTOR E JANELA PRINCIPAL (BLINDADA)
 -- ====================================================================================== --
 
 -- ID: B1 - TEMA E CONFIGURAÇÕES DEFAULTS
@@ -69,7 +44,7 @@ local DefaultTheme = {
     ["Color Hub BG"] = Color3.fromRGB(15, 15, 15),
     ["Color Panel BG"] = Color3.fromRGB(24, 24, 24),
     ["Color Stroke"] = Color3.fromRGB(40, 40, 40),
-    ["Color Theme"] = Color3.fromRGB(0, 150, 255), -- Azul padrão para o tema
+    ["Color Theme"] = Color3.fromRGB(0, 150, 255), 
     ["Color Text"] = Color3.fromRGB(240, 240, 240),
     ["Color Dark Text"] = Color3.fromRGB(150, 150, 150)
 }
@@ -83,13 +58,15 @@ local DefaultConfig = {
 
 
 -- ID: B2 - O CONSTRUTOR MESTRE (:new)
--- Usa Tabela Options e garante a herança (MANDAMENTO DA ARQUITETURA __index)
+-- Usa Tabela Options (MANDAMENTO DA API options) e garante a herança (MANDAMENTO DA ARQUITETURA __index)
 function rareLib:new(options)
-    -- O Hub é a tabela que deve herdar TUDO de rareLib (pCreate, pMakeDrag, pcall, CreateTab, etc)
-    local self = setmetatable({}, rareLib) 
-    
+    local options = options or {}
+    local Title = options.Title or options or "Rare Lib V7" -- Aceita string se você passar apenas a string
+
+    local self = setmetatable({}, rareLib) -- O Hub herda TUDO de rareLib
+
     -- Juntar Configs/Theme do usuário com os defaults
-    self.Options = options or {}
+    self.Options = options
     self.Config = setmetatable(self.Options.Config or {}, {__index = DefaultConfig})
     self.Theme = setmetatable(self.Options.Theme or {}, {__index = DefaultTheme})
     
@@ -98,6 +75,7 @@ function rareLib:new(options)
     
     -- Propriedades internas
     self.Tabs, self.CurrentTab = {}, nil
+    self.Title = Title
     
     -- O ScreenGui que segura tudo
     self.MainGui = self.pCreate("ScreenGui", {Parent = PlayerGui, Name = "RARE_LIB_UI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling})
@@ -109,7 +87,7 @@ function rareLib:new(options)
         Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2), 
         BackgroundColor3 = self.Theme["Color Panel BG"],
         BorderColor3 = self.Theme["Color Stroke"], BorderSizePixel = 1,
-        ClipsDescendants = false, -- CORREÇÃO DO ERRO VISUAL #1
+        ClipsDescendants = false, -- CORREÇÃO DO ERRO VISUAL #1 (CONSTELAÇÃO)
         ZIndex = 5
     })
     
@@ -129,9 +107,35 @@ function rareLib:new(options)
     -- Título
     self.pCreate("TextLabel", {
         Parent = TitleBar, Name = "TitleLabel", Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1, Font = Enum.Font.GothamBold, Text = self.Config.Title or self.Options.Title,
+        BackgroundTransparency = 1, Font = Enum.Font.GothamBold, Text = self.Title,
         TextColor3 = self.Theme["Color Text"], TextSize = 18, ZIndex = 7
     })
+
+    -- Funções pMakeDrag
+    local function pMakeDrag(instance, dragHandle)
+        local isDragging, dragStart, startPos = false, Vector2.new(), UDim2.new()
+        local Handle = dragHandle or instance 
+        
+        Handle.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                isDragging, startPos, dragStart = true, instance.Position, input.Position
+                UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - dragStart
+                instance.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+        Handle.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+                isDragging = false 
+                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+            end
+        end)
+    end
+    self.pMakeDrag = pMakeDrag -- Expoe para uso interno
 
     -- Tornar a TitleBar arrastável
     self.pMakeDrag(self.MainFrame, TitleBar) 
@@ -147,16 +151,16 @@ function rareLib:new(options)
     ToggleButton.MouseButton1Click:Connect(function() 
         self.MainFrame.Visible = not self.MainFrame.Visible 
     end)
-    self.pMakeDrag(ToggleButton)
+    self.pMakeDrag(ToggleButton, ToggleButton)
 
     return self
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
--- [ ! ] - PARTE 3/20: CONSTELAÇÃO (O EFEITO DRIP) E ATUALIZAÇÃO DO CONSTRUTOR (REFORMADA)
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
+-- [ ! ] - PARTE 3/20: CONSTELAÇÃO (O EFEITO DRIP) E ATUALIZAÇÃO DO CONSTRUTOR
 -- ====================================================================================== --
 
--- ID: C1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR O EFEITO DE PARTÍCULAS (AGORA BLINDADA)
+-- ID: C1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR O EFEITO DE PARTÍCULAS (BLINDADA)
 function rareLib:__buildConstellation()
     local Theme = self.Theme
     
@@ -164,7 +168,7 @@ function rareLib:__buildConstellation()
         Parent = self.MainFrame, 
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, 
-        ZIndex = 0 
+        ZIndex = 0 -- ESSENCIAL: Fica atrás de absolutamente tudo (REQUERIMENTO VISÍVEL)
     })
     
     local particles, lines = {}, {}
@@ -189,8 +193,8 @@ function rareLib:__buildConstellation()
         })
     end
     
-    -- BLINDAGEM CRÍTICA: Verifica se a Lib ainda existe antes de tentar rodar.
-    local hubRef = self -- Mantém a referência do Hub para a função externa
+    -- BLINDAGEM CONTRA NIL VALUE: Referência ao Hub para threads de longa duração
+    local hubRef = self 
     local connection = RunService.RenderStepped:Connect(function(dt)
         -- VERIFICAÇÃO ESSENCIAL: Garante que o Hub e a UI ainda existem e não são NIL
         if not hubRef or not hubRef.MainGui or not hubRef.MainGui.Parent then 
@@ -198,9 +202,7 @@ function rareLib:__buildConstellation()
             return 
         end
         
-        -- Destrói as linhas antigas para redesenhar
-        -- (O erro 'nil value' pode ser aqui se 'lines' não for uma tabela ou se um elemento for nil,
-        -- mas a linha 'for _, line in ipairs(lines) do line:Destroy() end' já mitiga, vamos simplificar o loop de destroy)
+        -- Destrói as linhas antigas para redesenhar (Iteração para evitar nil value em Destroy)
         for i = #lines, 1, -1 do
             if lines[i] and lines[i].Parent then lines[i]:Destroy() end
             table.remove(lines, i)
@@ -246,7 +248,7 @@ function rareLib:new(options)
     return Hub
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 4/20: DESENHANDO OS PAINÉIS INTERNOS (CLEAN DESIGN)
 -- ====================================================================================== --
 
@@ -255,8 +257,8 @@ function rareLib:__buildPanels()
     local Theme = self.Theme
     local Config = self.Config
     
-    -- 1. O Container Geral dentro do MainFrame
     local TitleBarHeight = 28 -- Altura da TitleBar (Parte 2)
+    -- O Container Geral dentro do MainFrame
     local PanelsContainer = self.pCreate("Frame", {
         Parent = self.MainFrame, 
         Name = "PanelsContainer",
@@ -279,7 +281,7 @@ function rareLib:__buildPanels()
     local NavContainerHolder = self.pCreate("Frame", {
         Parent = PanelsContainer, Name = "NavContainerHolder", 
         Size = UDim2.new(0, Config.TabSize, 1, 0),
-        BackgroundColor3 = Theme["Color Hub BG"], -- Fundo mais escuro para o painel lateral
+        BackgroundColor3 = Theme["Color Hub BG"], 
         BorderSizePixel = 0, 
         ZIndex = 9
     })
@@ -297,7 +299,7 @@ function rareLib:__buildPanels()
     -- Layout para os botões de Tab
     self.pCreate("UIListLayout", {
         Parent = self.NavContainer, 
-        Padding = UDim.new(0, 5), -- Espaçamento entre os botões
+        Padding = UDim.new(0, 5), 
         SortOrder = Enum.SortOrder.LayoutOrder,
         HorizontalAlignment = Enum.HorizontalAlignment.Center
     })
@@ -312,7 +314,7 @@ function rareLib:__buildPanels()
     -- B. Painel de Conteúdo (Direita) - Onde os componentes ficam
     local ContentPanelHolder = self.pCreate("Frame", {
         Parent = PanelsContainer, Name = "ContentPanelHolder", 
-        -- Calcula o tamanho: 100% - TabSize - Padding total horizontal (Config.Padding)
+        -- Ocupa o restante da largura: 100% - TabSize - Padding
         Size = UDim2.new(1, -(Config.TabSize + Config.Padding), 1, 0), 
         -- Posição: TabSize + Padding
         Position = UDim2.new(0, Config.TabSize + Config.Padding, 0, 0), 
@@ -320,14 +322,14 @@ function rareLib:__buildPanels()
     })
     
     -- Container interno que vai segurar as páginas das Tabs
-    self.PagesContainer = self.pCreate("Frame", {
-        Parent = ContentPanelHolder, Name = "PagesContainer",
+    self.ContentPanel = self.pCreate("Frame", { -- Renomeado para ContentPanel (Sem PagesContainer)
+        Parent = ContentPanelHolder, Name = "ContentPanel",
         Size = UDim2.new(1, 0, 1, 0), 
-        BackgroundColor3 = Theme["Color Hub BG"], -- Cor do painel de conteúdo
-        ClipsDescendants = true, -- Aqui PODE cortar o conteúdo, mas não o Constellation (ZIndex=0)
+        BackgroundColor3 = Theme["Color Hub BG"], 
+        ClipsDescendants = true, 
         ZIndex = 10
     })
-    self.pCreate("UICorner", {Parent = self.PagesContainer, CornerRadius = UDim.new(0, Config.CornerRadius)})
+    self.pCreate("UICorner", {Parent = self.ContentPanel, CornerRadius = UDim.new(0, Config.CornerRadius)})
     
 end
 
@@ -341,23 +343,22 @@ function rareLib:new(options)
     return Hub
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 5/20: CRIAÇÃO E LÓGICA DAS ABAS (TABS)
 -- ====================================================================================== --
 
 -- ID: E1 - A API PÚBLICA PARA CRIAR ABAS: Hub:CreateTab(options)
 function rareLib:CreateTab(options)
     local options = options or {}
-    local TName = options.Title or "Nova Tab" 
+    -- Permite options.Title ou apenas options (string) para retrocompatibilidade com sua implementação
+    local TName = options.Title or options or "Nova Tab" 
     
     local Theme = self.Theme
     local Config = self.Config
     
     -- O objeto Tab. Herda de rareLib.Tab, que tem __index = rareLib (Hub)
-    local Tab = setmetatable({
-        Name = TName,
-        ParentHub = self, 
-    }, rareLib.Tab) 
+    local Tab = setmetatable({ParentHub = self}, rareLib.Tab) 
+    Tab.Name = TName
     
     -- 1. Botão de Navegação (NavContainer)
     Tab.Button = self.pCreate("TextButton", {
@@ -366,7 +367,7 @@ function rareLib:CreateTab(options)
         TextXAlignment = Enum.TextXAlignment.Left, 
         Font = Enum.Font.GothamBold, TextSize = 15,
         TextColor3 = Theme["Color Dark Text"], 
-        Size = UDim2.new(1, -Config.Padding, 0, 32), 
+        Size = UDim2.new(1, -5, 0, 32), 
         Position = UDim2.new(0.5, 0, 0, 0), AnchorPoint = Vector2.new(0.5, 0),
         BackgroundColor3 = Theme["Color Hub BG"], 
         LayoutOrder = #self.Tabs + 1, 
@@ -377,9 +378,9 @@ function rareLib:CreateTab(options)
     -- UI Visual do Botão (UI ARREDONDADA)
     self.pCreate("UICorner", {Parent = Tab.Button, CornerRadius = UDim.new(0, Config.CornerRadius - 2)})
     
-    -- 2. Container de Conteúdo (PagesContainer)
+    -- 2. Container de Conteúdo (ContentPanel)
     Tab.Container = self.pCreate("ScrollingFrame", {
-        Parent = self.PagesContainer, Name = TName .. "_Container", 
+        Parent = self.ContentPanel, Name = TName .. "_Container", 
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, BorderSizePixel = 0,
         AutomaticCanvasSize = "Y", ScrollingDirection = "Y",
@@ -436,7 +437,7 @@ function rareLib:CreateTab(options)
     return Tab
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 6/20: NOVAS FUNÇÕES DE UTILIDADE (TÍTULOS, LABELS, SEPARADORES)
 -- ====================================================================================== --
 
@@ -528,12 +529,12 @@ function rareLib:AddLabel(options)
     return { Label = Label }
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 7/20: O MOLDE UNIVERSAL DOS COMPONENTES (OPÇÃO FRAME)
 -- ====================================================================================== --
 
 -- ID: G1 - A BASE VISUAL DOS COMPONENTES (FRAME DE OPÇÃO)
--- Função privada que cria o "molde" visual para todos os componentes.
+-- Função que cria o "molde" visual para todos os componentes interativos.
 function rareLib:__createOptionFrame(options)
     local options = options or {}
     local Theme = self.ParentHub.Theme 
@@ -546,7 +547,7 @@ function rareLib:__createOptionFrame(options)
         Size = UDim2.new(1, 0, 0, 45), -- Altura fixa (Minimalismo)
         BackgroundColor3 = Theme["Color Panel BG"], 
         LayoutOrder = #ParentContainer:GetChildren() + 1,
-        ClipsDescendants = false -- ESSENCIAL: Permite que o Knob do Toggle não seja cortado (CORREÇÃO DE ERRO ANTIGO)
+        ClipsDescendants = false -- ESSENCIAL: Permite que o Knob do Toggle não seja cortado
     })
     
     -- 2. Cantos Arredondados (UI ARREDONDADA)
@@ -597,7 +598,7 @@ function rareLib:__createOptionFrame(options)
     return Frame, MainContainer
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 8/20: BOTÃO (ADD BUTTON)
 -- ====================================================================================== --
 
@@ -647,7 +648,7 @@ function rareLib:AddButton(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 9/20: TOGGLES (ADD TOGGLE) - CORREÇÃO DO KNOB
 -- ====================================================================================== --
 
@@ -664,7 +665,7 @@ function rareLib:AddToggle(options)
     -- 1. Botão/Barra do Switch
     local ToggleButton = self.pCreate("Frame", {
         Parent = MainContainer, Name = "Switch", 
-        Size = UDim2.new(0, 32, 0, 18), 
+        Size = UDim2.new(0, 32, 0, 18), -- Switch compacto
         Position = UDim2.new(1, -options.RightSideWidth + 4, 0.5, 0), -- 4px de padding
         AnchorPoint = Vector2.new(0, 0.5), 
         BackgroundColor3 = Theme["Color Stroke"],
@@ -674,7 +675,7 @@ function rareLib:AddToggle(options)
     
     -- 2. Knob (A Bolinha)
     local KnobSize = 14
-    local Padding = 2 -- Espaçamento interno (2px de cada lado)
+    local Padding = 2 
     
     local Knob = self.pCreate("Frame", {
         Parent = ToggleButton, Name = "Knob", 
@@ -692,7 +693,7 @@ function rareLib:AddToggle(options)
     local function UpdateKnob(newState, isInstant)
         state = newState
         
-        -- Posição FINAL: Largura do ToggleButton (32) - Padding (2) - metade do Knob (7) = 23
+        -- Posição FINAL: Largura da Barra (32) - Padding (2) - metade do Knob (7) = 23
         local targetX = 32 - KnobSize/2 - Padding
         
         local targetPos = newState and UDim2.new(0, targetX, 0.5, 0) or UDim2.new(0, KnobSize/2 + Padding, 0.5, 0)
@@ -740,14 +741,14 @@ function rareLib:AddToggle(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 10/20: SLIDERS (ADD SLIDER)
 -- ====================================================================================== --
 
 -- ID: J1 - A API PÚBLICA PARA CRIAR SLIDERS: Tab:AddSlider({...})
 function rareLib:AddSlider(options)
     local options = options or {}
-    options.RightSideWidth = options.RightSideWidth or 120 -- Largura reservada para a barra e o valor
+    options.RightSideWidth = options.RightSideWidth or 120 
     local Theme = self.ParentHub.Theme
     local Min, Max = options.Min or 0, options.Max or 100
     local Default = math.clamp(options.Default or 0, Min, Max)
@@ -774,7 +775,7 @@ function rareLib:AddSlider(options)
     })
     
     -- 3. Barra Principal (Fica à esquerda do ValueLabel)
-    local BarWidth = options.RightSideWidth - 30 - 4 -- Largura total - largura do valor - espaço
+    local BarWidth = options.RightSideWidth - 30 - 4 
     local SliderBar = self.pCreate("Frame", {
         Parent = SliderHolder, Name = "SliderBar", BackgroundColor3 = Theme["Color Stroke"],
         Size = UDim2.new(0, BarWidth, 0, 6), Position = UDim2.new(0, 0, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5),
@@ -841,7 +842,7 @@ function rareLib:AddSlider(options)
     end)
     
     UserInputService.InputChanged:Connect(function(input)
-        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType.Touch) then
             processInput(input)
         end
     end)
@@ -863,7 +864,7 @@ function rareLib:AddSlider(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 11/20: DROPDOWNS (ADD DROPDOWN)
 -- ====================================================================================== --
 
@@ -982,7 +983,7 @@ function rareLib:AddDropdown(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 12/20: TEXTBOXES (ADD TEXTBOX)
 -- ====================================================================================== --
 
@@ -1052,7 +1053,7 @@ function rareLib:AddTextbox(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 13/20: SELETOR DE TECLAS (ADD KEYBIND)
 -- ====================================================================================== --
 
@@ -1120,7 +1121,7 @@ function rareLib:AddKeybind(options)
     end
     
     KeyLabel.MouseButton1Click:Connect(function()
-        if isListening then UpdateKeyDisplay(Enum.KeyCode.Unknown)
+        if isListening then UpdateKeyDisplay(Enum.KeyCode.Unknown) -- Cancelar e setar para NONE
         else StartListening() end
     end)
     
@@ -1147,10 +1148,8 @@ function rareLib:AddKeybind(options)
     
     return API
 end
-
-
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
 -- [ ! ] - PARTE 14/20: LABEL DE LINK/CRÉDITO
 -- ====================================================================================== --
 
@@ -1213,17 +1212,6 @@ function rareLib:AddLabelLink(options)
 end
 
 
--- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
--- [ ! ] - PARTES 15/20 A 19/20: RESERVADAS PARA FUTUROS COMPONENTES AVANÇADOS 
--- ====================================================================================== --
--- O espaço está reservado, a V7 é modular!
-
-
--- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
--- [ ! ] - PARTE 20/20: O FIM DA LIB. RETORNANDO O OBJETO PRINCIPAL.
--- ====================================================================================== --
 
 -- ID: Z1 - O GRANDE FINAL!
 return rareLib
