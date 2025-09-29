@@ -155,10 +155,10 @@ function rareLib:new(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
--- [ ! ] - PARTE 3/20: CONSTELAÇÃO (O EFEITO DRIP) E ATUALIZAÇÃO DO CONSTRUTOR
+-- [ ! ] - PARTE 3/20: CONSTELAÇÃO (O EFEITO DRIP) E ATUALIZAÇÃO DO CONSTRUTOR (REFORMADA)
 -- ====================================================================================== --
 
--- ID: C1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR O EFEITO DE PARTÍCULAS
+-- ID: C1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR O EFEITO DE PARTÍCULAS (AGORA BLINDADA)
 function rareLib:__buildConstellation()
     local Theme = self.Theme
     
@@ -166,7 +166,7 @@ function rareLib:__buildConstellation()
         Parent = self.MainFrame, 
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, 
-        ZIndex = 0 -- ESSENCIAL: Fica atrás de absolutamente tudo (REQUERIMENTO)
+        ZIndex = 0 
     })
     
     local particles, lines = {}, {}
@@ -190,12 +190,23 @@ function rareLib:__buildConstellation()
             vel = Vector2.new(math.random() * 2 - 1, math.random() * 2 - 1) * 15
         })
     end
-
+    
+    -- BLINDAGEM CRÍTICA: Verifica se a Lib ainda existe antes de tentar rodar.
+    local hubRef = self -- Mantém a referência do Hub para a função externa
     local connection = RunService.RenderStepped:Connect(function(dt)
-        if not self.MainGui or not self.MainGui.Parent then connection:Disconnect() return end
+        -- VERIFICAÇÃO ESSENCIAL: Garante que o Hub e a UI ainda existem e não são NIL
+        if not hubRef or not hubRef.MainGui or not hubRef.MainGui.Parent then 
+            connection:Disconnect() 
+            return 
+        end
         
         -- Destrói as linhas antigas para redesenhar
-        for _, line in ipairs(lines) do line:Destroy() end; lines = {}
+        -- (O erro 'nil value' pode ser aqui se 'lines' não for uma tabela ou se um elemento for nil,
+        -- mas a linha 'for _, line in ipairs(lines) do line:Destroy() end' já mitiga, vamos simplificar o loop de destroy)
+        for i = #lines, 1, -1 do
+            if lines[i] and lines[i].Parent then lines[i]:Destroy() end
+            table.remove(lines, i)
+        end
         
         local currentSize = particleFrame.AbsoluteSize
         if currentSize.X == 0 then return end
@@ -213,7 +224,7 @@ function rareLib:__buildConstellation()
                 if dist < connectDistance then
                     -- Cria a linha
                     local alpha = 1 - dist / connectDistance
-                    table.insert(lines, self.pCreate("Frame", {
+                    table.insert(lines, hubRef.pCreate("Frame", {
                         Parent = particleFrame, Size = UDim2.new(0, dist, 0, 1),
                         Position = UDim2.fromOffset((p1.pos.X + p2.pos.X) / 2, (p1.pos.Y + p2.pos.Y) / 2),
                         Rotation = math.deg(math.atan2(p2.pos.Y - p1.pos.Y, p2.pos.X - p1.pos.X)),
