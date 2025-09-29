@@ -1,5 +1,4 @@
-    return Hub
-end-- ====================================================================================== --
+-- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
 -- [ ! ] - PARTE 1/20: A FUNDAÇÃO INABALÁVEL (ALICERCE V7)
 -- ====================================================================================== --
@@ -62,7 +61,7 @@ function rareLib:pcall(...)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (SIMPLIFICADO) - by RARO XT & DRIP
--- [ ! ] - PARTE 2/20: CONSTRUTOR E JANELA PRINCIPAL
+-- [ ! ] - PARTE 2/20: CONSTRUTOR E JANELA PRINCIPAL (REFORMADA COMPLETA E GARANTIDA)
 -- ====================================================================================== --
 
 -- ID: B1 - TEMA E CONFIGURAÇÕES DEFAULTS
@@ -84,9 +83,10 @@ local DefaultConfig = {
 
 
 -- ID: B2 - O CONSTRUTOR MESTRE (:new)
--- Usa Tabela Options (MANDAMENTO DA API options)
+-- Usa Tabela Options e garante a herança (MANDAMENTO DA ARQUITETURA __index)
 function rareLib:new(options)
-    local self = setmetatable({}, rareLib)
+    -- O Hub é a tabela que deve herdar TUDO de rareLib (pCreate, pMakeDrag, pcall, CreateTab, etc)
+    local self = setmetatable({}, rareLib) 
     
     -- Juntar Configs/Theme do usuário com os defaults
     self.Options = options or {}
@@ -109,7 +109,7 @@ function rareLib:new(options)
         Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2), 
         BackgroundColor3 = self.Theme["Color Panel BG"],
         BorderColor3 = self.Theme["Color Stroke"], BorderSizePixel = 1,
-        ClipsDescendants = false, -- CORREÇÃO DO ERRO VISUAL #1 (CONSTELAÇÃO): Não pode cortar as partículas!
+        ClipsDescendants = false, -- CORREÇÃO DO ERRO VISUAL #1
         ZIndex = 5
     })
     
@@ -133,10 +133,8 @@ function rareLib:new(options)
         TextColor3 = self.Theme["Color Text"], TextSize = 18, ZIndex = 7
     })
 
-    -- Tornar a TitleBar arrastável (pMakeDrag da Parte 1)
+    -- Tornar a TitleBar arrastável
     self.pMakeDrag(self.MainFrame, TitleBar) 
-    
-    -- Removido: CanvasGroup (Obrigado pela simplicidade, Chefe!)
     
     -- Botão flutuante para abrir/fechar (UX)
     local ToggleButton = self.pCreate("TextButton", {
