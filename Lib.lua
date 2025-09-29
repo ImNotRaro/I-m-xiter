@@ -1,24 +1,24 @@
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
--- [ ! ] - PARTE 1/20: A FUNDAÇÃO (ALICERCE FINAL)
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 1/20: A FUNDAÇÃO (ALICERCE DE CONCRETO PURO)
 -- ====================================================================================== --
 
--- ID: A1 - O MOLDE MESTRE (A "CLASSE" RARELIB)
--- A planta mestra. Tudo nasce dela.
+-- ID: A1 - O MOLDE (A "CLASSE" RARELIB)
+-- A planta da nossa obra. Tudo vai nascer daqui.
 local rareLib = {}
-rareLib.__index = rareLib
+rareLib.__index = rareLib -- A vacina anti-erro de API da V3. Essencial.
 
--- ID: A2 - SERVIÇOS ESSENCIAIS (O ARSENAL DO CHEFE)
+-- ID: A2 - ARSENAL DE SERVIÇOS
+-- Puxando as ferramentas do Roblox uma única vez.
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
 
--- ID: A3 - FUNÇÃO DE CRIAÇÃO BÁSICA (A NOSSA FÁBRICA DE PEÇAS)
--- A única ferramenta que a gente precisa.
+-- ID: A3 - FUNÇÃO DE CRIAÇÃO BÁSICA (A NOSSA FÁBRICA)
+-- A única ferramenta de construção que a gente precisa.
 local function pCreate(instanceType, properties)
     local newInstance = Instance.new(instanceType)
     if properties then
@@ -28,9 +28,13 @@ local function pCreate(instanceType, properties)
     end
     return newInstance
 end
+-- ====================================================================================== --
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 2/20: O CONSTRUTOR DO HUB E A JANELA MINIMALISTA
+-- ====================================================================================== --
 
--- ID: A4 - FUNÇÃO DE ARRASTAR (O DRAG DO CHEFE)
--- Garante que a janela seja arrastável no PC e no mobile.
+-- ID: B1 - FUNÇÃO DE ARRASTAR (MOBILE SOBERANO)
+-- Função privada para arrastar a janela. Sem frescura, 100% funcional.
 local function pMakeDrag(instance)
     local isDragging = false
     local startPos, dragStart
@@ -49,77 +53,56 @@ local function pMakeDrag(instance)
     end)
 end
 
--- ID: A5 - FUNÇÃO DE TRACKING DE INSTÂNCIA (PARA TEMAS FUTUROS)
--- Por enquanto, só retorna a instância. Mas no futuro, vai ser crucial.
-local function pTrack(instance, themeType)
-    return instance
-end
--- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO PERFEITA - by RARO XT & DRIP
--- [ ! ] - PARTE 2/20: O CONSTRUTOR DO HUB E A JANELA PRINCIPAL
--- ====================================================================================== --
-
--- ID: B1 - O CONSTRUTOR MESTRE (:new)
--- A porta de entrada principal. Cria o objeto Hub e a estrutura básica da UI.
+-- ID: B2 - O CONSTRUTOR MESTRE (:new)
+-- A única porta de entrada. Cria o objeto Hub e desenha a UI.
 function rareLib:new(Title)
-    -- Limpa qualquer UI antiga para evitar conflitos.
-    if CoreGui:FindFirstChild("RARE_LIB_UI") then
-        CoreGui.RARE_LIB_UI:Destroy()
-    end
+    if CoreGui:FindFirstChild("RARE_LIB_UI") then CoreGui.RARE_LIB_UI:Destroy() end
 
-    -- Cria o objeto Hub usando a metatable para herança de API.
     local Hub = setmetatable({}, rareLib)
 
-    -- Configurações e Tema do Hub
+    -- Configurações e Tema
     Hub.Title = Title or "Rare Lib"
     Hub.Theme = {
-        ["Color Hub BG"] = Color3.fromRGB(15, 15, 15),
-        ["Color Panel BG"] = Color3.fromRGB(12, 12, 12),
-        ["Color Stroke"] = Color3.fromRGB(40, 40, 40),
-        ["Color Theme"] = Color3.fromRGB(139, 0, 0),
-        ["Color Text"] = Color3.fromRGB(240, 240, 240),
-        ["Color Dark Text"] = Color3.fromRGB(150, 150, 150)
+        ["Color Hub BG"] = Color3.fromRGB(15, 15, 15), ["Color Panel BG"] = Color3.fromRGB(12, 12, 12),
+        ["Color Stroke"] = Color3.fromRGB(40, 40, 40), ["Color Theme"] = Color3.fromRGB(139, 0, 0),
+        ["Color Text"] = Color3.fromRGB(240, 240, 240), ["Color Dark Text"] = Color3.fromRGB(150, 150, 150)
     }
-    Hub.Config = {
-        UISize = {700, 450},
-        TabSize = 150
-    }
+    Hub.Config = { UISize = {700, 450}, TabSize = 150 }
     Hub.Tabs, Hub.CurrentTab = {}, nil
 
-    -- ScreenGui principal que vai conter toda a UI.
-    Hub.MainGui = pCreate("ScreenGui", {
-        Parent = CoreGui, Name = "RARE_LIB_UI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    })
+    -- O ScreenGui que segura tudo
+    Hub.MainGui = pCreate("ScreenGui", {Parent = CoreGui, Name = "RARE_LIB_UI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling})
     
-    -- MainFrame: A janela principal que será arrastável e conterá tudo.
-    local Theme, Config = Hub.Theme, Hub.Config
+    -- O MainFrame (A janela principal)
+    local Theme = Hub.Theme
+    local UISizeX, UISizeY = unpack(Hub.Config.UISize)
     Hub.MainFrame = pCreate("Frame", {
-        Parent = Hub.MainGui, Name = "Hub", Size = UDim2.fromOffset(Config.UISize[1], Config.UISize[2]),
-        Position = UDim2.new(0.5, -Config.UISize[1]/2, 0.5, -Config.UISize[2]/2), BackgroundColor3 = Theme["Color Hub BG"],
+        Parent = Hub.MainGui, Name = "Hub", Size = UDim2.fromOffset(UISizeX, UISizeY),
+        Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2), BackgroundColor3 = Theme["Color Hub BG"],
         BorderColor3 = Theme["Color Stroke"], BorderSizePixel = 2
     })
-    pCreate("UICorner", {Parent = Hub.MainFrame, CornerRadius = UDim.new(0, 12)}) -- Janela arredondada
-    pMakeDrag(Hub.MainFrame)
+    pCreate("UICorner", {Parent = Hub.MainFrame, CornerRadius = UDim.new(0, 12)})
+    pMakeDrag(Hub.MainFrame) -- O Frame todo é arrastável pela borda
 
-    -- Barra de Título com o nome do Hub.
+    -- Barra de Título (A NOVIDADE)
     local TitleBar = pCreate("Frame", {
         Parent = Hub.MainFrame, Name = "TitleBar", Size = UDim2.new(1, 0, 0, 30),
         BackgroundColor3 = Theme["Color Panel BG"], ZIndex = 2
     })
-    pCreate("UICorner", {Parent = TitleBar, CornerRadius = UDim.new(0, 10)}) -- Título levemente arredondado
+    pCreate("UICorner", {Parent = TitleBar, CornerRadius = UDim.new(0, 10)})
     pCreate("TextLabel", {
         Parent = TitleBar, Name = "TitleLabel", Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, Font = Enum.Font.GothamBold, Text = Hub.Title,
         TextColor3 = Theme["Color Text"], TextSize = 16
     })
 
-    -- Botão flutuante para abrir/fechar a UI.
+    -- Botão flutuante para abrir/fechar
     local ToggleButton = pCreate("TextButton", {
         Parent = Hub.MainGui, Size = UDim2.new(0, 50, 0, 50), Position = UDim2.new(0, 15, 0.5, -25),
         BackgroundColor3 = Theme["Color Theme"], Text = "愛", Font = Enum.Font.GothamBold,
         TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 32,
     })
-    pCreate("UICorner", {Parent = ToggleButton, CornerRadius = UDim.new(1, 0)}) -- Botão totalmente redondo
+    pCreate("UICorner", {Parent = ToggleButton, CornerRadius = UDim.new(1, 0)})
     pCreate("UIStroke", {Parent = ToggleButton, Color = Color3.fromRGB(255, 255, 255)})
     ToggleButton.MouseButton1Click:Connect(function() Hub.MainFrame.Visible = not Hub.MainFrame.Visible end)
     pMakeDrag(ToggleButton)
@@ -127,29 +110,30 @@ function rareLib:new(Title)
     return Hub
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
--- [ ! ] - PARTE 3/20: PAINÉIS INTERNOS E A CONSTELAÇÃO (SOLUÇÃO FINAL)
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 3/20: DESENHANDO OS PAINÉIS INTERNOS
 -- ====================================================================================== --
 
 -- ID: C1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR OS PAINÉIS
--- Desenha os 3 painéis principais: Navegação (Esquerda), Conteúdo (Centro), Status (Direita).
+-- Esta função desenha os 3 painéis principais: Navegação, Conteúdo e Status.
 function rareLib:__buildPanels()
     local Theme = self.Theme
     local TabSize = self.Config.TabSize
 
-    -- O Container Geral para os 3 painéis, abaixo da TitleBar.
+    -- O Container Geral que vai segurar os 3 painéis, posicionado abaixo da TitleBar.
     local PanelsContainer = pCreate("Frame", {
         Parent = self.MainFrame,
         Name = "PanelsContainer",
-        Size = UDim2.new(1, 0, 1, -30), -- Tudo menos a TitleBar
+        Size = UDim2.new(1, 0, 1, -30), -- Ocupa o espaço todo menos os 30px da TitleBar
         Position = UDim2.new(0, 0, 0, 30),
-        BackgroundTransparency = 1 -- O container em si é invisível
+        BackgroundTransparency = 1
     })
 
-    -- Padding geral para dar respiro.
+    -- Padding para dar um respiro em volta dos painéis.
     pCreate("UIPadding", {
         Parent = PanelsContainer,
-        PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10),
+        PaddingLeft = UDim.new(0, 10),
+        PaddingRight = UDim.new(0, 10),
         PaddingBottom = UDim.new(0, 10)
     })
     
@@ -179,81 +163,145 @@ function rareLib:__buildPanels()
     pCreate("UICorner", {Parent = self.ContentPanel, CornerRadius = UDim.new(0, 6)})
 end
 
--- ID: C2 - O CONSTRUTOR DA CONSTELAÇÃO (O EFEITO DE FUNDO)
-function rareLib:__buildConstellation()
-    local Theme = self.Theme
-    
-    -- O Fundo da Constelação (Camada 0 dentro do MainFrame, mas acima do MainFrame BG)
-    local particleFrame = pCreate("Frame", {
-        Parent = self.MainFrame,
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1, 
-        ZIndex = 0
-    })
-    
-    local particles, lines = {}, {}
-    local numParticles, connectDistance = 50, 120
-
-    task.wait() 
-    local frameSize = particleFrame.AbsoluteSize
-
-    for i = 1, numParticles do
-        local p = pCreate("Frame", {
-            Parent = particleFrame, Size = UDim2.new(0, 3, 0, 3),
-            BackgroundColor3 = Theme["Color Theme"], BorderSizePixel = 0
-        })
-        pCreate("UICorner", {Parent = p, CornerRadius = UDim.new(1, 0)})
-        table.insert(particles, {
-            gui = p,
-            pos = Vector2.new(math.random(0, frameSize.X), math.random(0, frameSize.Y)),
-            vel = Vector2.new(math.random(-20, 20), math.random(-20, 20))
-        })
-    end
-
-    local connection = RunService.RenderStepped:Connect(function(dt)
-        if not self.MainGui or not self.MainGui.Parent then connection:Disconnect() return end
-        for _, line in ipairs(lines) do line:Destroy() end; lines = {}
-        
-        local currentSize = particleFrame.AbsoluteSize
-        if currentSize.X == 0 then return end
-
-        for i, p1 in ipairs(particles) do
-            p1.pos = p1.pos + p1.vel * dt
-            if p1.pos.X < 0 or p1.pos.X > currentSize.X then p1.vel = Vector2.new(-p1.vel.X, p1.vel.Y) end
-            if p1.pos.Y < 0 or p1.pos.Y > currentSize.Y then p1.vel = Vector2.new(p1.vel.X, -p1.vel.Y) end
-            p1.gui.Position = UDim2.fromOffset(p1.pos.X, p1.pos.Y)
-            
-            for j = i + 1, #particles do
-                local p2 = particles[j]
-                local dist = (p1.pos - p2.pos).Magnitude
-                if dist < connectDistance then
-                    table.insert(lines, pCreate("Frame", {
-                        Parent = particleFrame, Size = UDim2.new(0, dist, 0, 2),
-                        Position = UDim2.fromOffset((p1.pos.X + p2.pos.X) / 2, (p1.pos.Y + p2.pos.Y) / 2),
-                        Rotation = math.deg(math.atan2(p2.pos.Y - p1.pos.Y, p2.pos.X - p1.pos.X)),
-                        BackgroundColor3 = Theme["Color Theme"], BorderSizePixel = 0, ZIndex = 0,
-                        BackgroundTransparency = 1 - (1 - dist / connectDistance) * 0.6,
-                    }))
-                end
-            end
-        end
-    end)
-end
-
--- ID: C3 - ATUALIZANDO O CONSTRUTOR MESTRE
--- Adiciona a chamada para construir os painéis e a constelação na inicialização.
+-- ID: C2 - ATUALIZANDO O CONSTRUTOR MESTRE
+-- Adicionando a construção dos painéis à inicialização.
 local OriginalNew_C = rareLib.new
 function rareLib:new(Title)
     local Hub = OriginalNew_C(self, Title)
 
-    Hub:__buildPanels()
-    Hub:__buildConstellation() -- Chama a função pra construir as partículas.
+    Hub:__buildPanels() -- Chama a função pra desenhar os painéis.
 
     return Hub
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
--- [ ! ] - PARTE 6/20: BOTÕES E TOGGLES
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 4/20: A SALA DO TRONO
+-- ====================================================================================== --
+
+-- ID: D1 - FUNÇÃO "PRIVADA" PARA CONSTRUIR A FICHA DE STATUS
+function rareLib:__buildStatusPanel()
+    local Theme = self.Theme
+    local LocalPlayer = Players.LocalPlayer
+
+    local FichaRPG = pCreate("Frame", {
+        Parent = self.RightPanel, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Name = "FichaRPG"
+    })
+    
+    pCreate("UIGradient", {
+        Parent = FichaRPG, Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 0))
+        }), Rotation = 90
+    })
+
+    local success, thumbUrl = pcall(Players.GetUserThumbnailAsync, Players, LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
+    
+    local AvatarImage = pCreate("ImageLabel", {
+        Parent = FichaRPG, Size = UDim2.new(0, 80, 0, 80), Position = UDim2.new(0.5, -40, 0, 40),
+        BackgroundColor3 = Theme["Color Theme"], Image = success and thumbUrl or "", ScaleType = Enum.ScaleType.Crop, BackgroundTransparency = 0.1
+    })
+    pCreate("UIAspectRatioConstraint", {Parent = AvatarImage})
+    pCreate("UICorner", {Parent = AvatarImage, CornerRadius = UDim.new(1, 0)})
+    pCreate("UIStroke", {Parent = AvatarImage, Color = Color3.fromRGB(255, 255, 255), Thickness = 2})
+
+    pCreate("TextLabel", {
+        Parent = FichaRPG, Size = UDim2.new(1, 0, 0, 25), Position = UDim2.new(0, 0, 0, 130),
+        Font = Enum.Font.GothamBold, Text = LocalPlayer.DisplayName, TextColor3 = Theme["Color Text"], TextSize = 20, BackgroundTransparency = 1
+    })
+
+    pCreate("TextLabel", {
+        Parent = FichaRPG, Size = UDim2.new(1, 0, 0, 20), Position = UDim2.new(0, 0, 0, 155),
+        Font = Enum.Font.Gotham, Text = "⛩️ " .. self.Title, TextColor3 = Theme["Color Theme"], TextSize = 14, BackgroundTransparency = 1
+    })
+
+    local function CreateStatusRow(name, posY)
+        local Row = pCreate("Frame", {Parent = FichaRPG, Size = UDim2.new(1, -20, 0, 22), Position = UDim2.new(0, 10, 0, posY), BackgroundTransparency = 1})
+        pCreate("TextLabel", {Parent = Row, Size = UDim2.new(0.5, 0, 1, 0), Font = Enum.Font.GothamBold, TextColor3 = Theme["Color Theme"], Text = name .. ":", TextXAlignment = Enum.TextXAlignment.Left, TextSize = 18, BackgroundTransparency = 1})
+        local ValueLabel = pCreate("TextLabel", {Parent = Row, Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), Font = Enum.Font.Gotham, TextColor3 = Theme["Color Text"], Text = "...", TextXAlignment = Enum.TextXAlignment.Right, TextSize = 18, BackgroundTransparency = 1})
+        return ValueLabel
+    end
+
+    local VidaLabel = CreateStatusRow("VIDA", 200)
+    local PingLabel = CreateStatusRow("PING", 230)
+    local FPSLabel = CreateStatusRow("FPS", 260)
+
+    task.spawn(function()
+        while self.MainGui and self.MainGui.Parent do
+            pcall(function()
+                local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                VidaLabel.Text = hum and string.format("%d/%d", math.floor(hum.Health), math.floor(hum.MaxHealth)) or "N/A"
+            end)
+            pcall(function() PingLabel.Text = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString() end)
+            pcall(function() FPSLabel.Text = tostring(math.floor(Workspace:GetRealPhysicsFPS())) end)
+            task.wait(1)
+        end
+    end)
+end
+
+-- ID: D2 - ATUALIZANDO O CONSTRUTOR MESTRE
+local OriginalNew_D = rareLib.new
+function rareLib:new(Title)
+    local Hub = OriginalNew_D(self, Title)
+
+    Hub:__buildStatusPanel()
+
+    return Hub
+end
+-- ====================================================================================== --
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 5/20: AS ABAS
+-- ====================================================================================== --
+
+-- ID: E1 - A API PÚBLICA PARA CRIAR ABAS: Hub:CreateTab()
+function rareLib:CreateTab(TName)
+    local Theme = self.Theme
+    
+    -- O objeto Tab. Ele vai herdar as funções do Hub (como AddButton)
+    local Tab = setmetatable({}, {__index = self})
+    Tab.Name = TName
+    
+    Tab.Button = pCreate("TextButton", {
+        Parent = self.NavContainer, Name = TName .. "Button", Text = "  " .. TName,
+        TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.Gotham, TextSize = 16,
+        TextColor3 = Theme["Color Dark Text"], Size = UDim2.new(1, 0, 0, 35),
+        BackgroundColor3 = Color3.fromRGB(25, 25, 25), LayoutOrder = #self.Tabs + 1, AutoButtonColor = false
+    })
+    pCreate("UICorner", {Parent = Tab.Button, CornerRadius = UDim.new(0, 4)})
+    pCreate("UIStroke", {Parent = Tab.Button, Color = Theme["Color Stroke"], Thickness = 1, ApplyStrokeMode = "Border"})
+
+    Tab.Container = pCreate("ScrollingFrame", {
+        Parent = self.ContentPanel, Name = TName .. "_Container", Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1, AutomaticCanvasSize = "Y", ScrollingDirection = "Y",
+        ScrollBarImageColor3 = Theme["Color Theme"], ScrollBarThickness = 6, Visible = false
+    })
+    pCreate("UIListLayout", {Parent = Tab.Container, Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder})
+    pCreate("UIPadding", {Parent = Tab.Container, PaddingTop = UDim.new(0, 10), PaddingRight = UDim.new(0, 5)})
+
+    local function SelectTab()
+        if self.CurrentTab == Tab then return end
+        if self.CurrentTab then
+            self.CurrentTab.Container.Visible = false
+            TweenService:Create(self.CurrentTab.Button, TweenInfo.new(0.2), {
+                TextColor3 = Theme["Color Dark Text"], BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            }):Play()
+        end
+        Tab.Container.Visible = true
+        self.CurrentTab = Tab
+        TweenService:Create(Tab.Button, TweenInfo.new(0.2), {
+            TextColor3 = Theme["Color Theme"], BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        }):Play()
+    end
+
+    Tab.Button.MouseButton1Click:Connect(SelectTab)
+    table.insert(self.Tabs, Tab)
+    
+    if #self.Tabs == 1 then SelectTab() end
+    
+    return Tab
+end
+-- ====================================================================================== --
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 6/20: BOTÕES
 -- ====================================================================================== --
 
 -- ID: F1 - A BASE VISUAL DOS COMPONENTES (FRAME DE OPÇÃO)
@@ -307,8 +355,12 @@ function rareLib:AddButton(options)
     
     return { Frame = Frame }
 end
+-- ====================================================================================== --
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
+-- [ ! ] - PARTE 7/20: TOGGLES
+-- ====================================================================================== --
 
--- ID: F3 - A API PÚBLICA PARA CRIAR TOGGLES: Tab:AddToggle({...})
+-- ID: G1 - A API PÚBLICA PARA CRIAR TOGGLES: Tab:AddToggle({...})
 function rareLib:AddToggle(options)
     options.RightSideWidth = 40 -- Define a largura reservada para o switch
     local Theme = self.Theme
@@ -361,25 +413,8 @@ function rareLib:AddToggle(options)
 
     return API
 end
-
--- ID: F3 - ATUALIZANDO O CONSTRUTOR DE ABAS
--- Injetando AddButton e AddToggle nas abas
-local OriginalCreateTab = rareLib.CreateTab
-function rareLib:CreateTab(TName)
-    local Tab = OriginalCreateTab(self, TName)
-    
-    Tab.AddButton = function(options)
-        return self:AddButton(setmetatable({Container = Tab.Container}, {__index = self}))
-    end
-    
-    Tab.AddToggle = function(options)
-        return self:AddToggle(Tab, options)
-    end
-    
-    return Tab
-end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
 -- [ ! ] - PARTE 8/20: SLIDERS
 -- ====================================================================================== --
 
@@ -474,26 +509,14 @@ function rareLib:AddSlider(options)
 
     return API
 end
-
--- ID: H2 - ATUALIZANDO A API DA ABA
-local OriginalTab_H = rareLib.CreateTab
-function rareLib:CreateTab(TName)
-    local Tab = OriginalTab_H(self, TName)
-    
-    Tab.AddSlider = function(options)
-        return self:AddSlider(setmetatable({Container = Tab.Container}, {__index = self}))
-    end
-    
-    return Tab
-end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
 -- [ ! ] - PARTE 9/20: DROPDOWNS
 -- ====================================================================================== --
 
 -- ID: I1 - A API PÚBLICA PARA CRIAR DROPDOWNS: Tab:AddDropdown({...})
 function rareLib:AddDropdown(options)
-    options.RightSideWidth = 140
+    options.RightSideWidth = 140 -- Define a largura reservada para a caixa
     local Theme = self.Theme
     local Options, Default, Callback = options.Options or {}, options.Default or options.Options[1], options.Callback
     local Frame = self:__createOptionFrame(self.Container, options)
@@ -501,9 +524,8 @@ function rareLib:AddDropdown(options)
     local isDropdownVisible = false
 
     local DropdownButton = pCreate("TextButton", {
-        Parent = Frame, Size = UDim2.new(0, 130, 0, 22),
-        Position = UDim2.new(1, -135, 0.5, -11), BackgroundColor3 = Theme["Color Stroke"],
-        Text = "", AutoButtonColor = false
+        Parent = Frame, Size = UDim2.new(0, 130, 0, 22), Position = UDim2.new(1, -135, 0.5, -11),
+        BackgroundColor3 = Theme["Color Stroke"], Text = "", AutoButtonColor = false
     })
     pCreate("UICorner", {Parent = DropdownButton, CornerRadius = UDim.new(0, 4)})
 
@@ -527,7 +549,7 @@ function rareLib:AddDropdown(options)
         Parent = Overlay, Size = UDim2.new(0, 130, 0, 1), BackgroundColor3 = Theme["Color Hub BG"],
         BorderColor3 = Theme["Color Theme"], BorderSizePixel = 2, ZIndex = 11,
         ScrollBarImageColor3 = Theme["Color Theme"], ScrollBarThickness = 6,
-        AutomaticCanvasSize = "Y", ScrollingDirection = Enum.ScrollingDirection.Y, ClipsDescendants = true
+        AutomaticCanvasSize = "Y", ScrollingDirection = "Y", ClipsDescendants = true
     })
     pCreate("UICorner", {Parent = ListPanel, CornerRadius = UDim.new(0, 4)})
     pCreate("UIListLayout", {Parent = ListPanel, Padding = UDim.new(0, 2), SortOrder = Enum.SortOrder.LayoutOrder})
@@ -581,7 +603,7 @@ function rareLib:AddDropdown(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
 -- [ ! ] - PARTE 10/20: TEXTBOXES
 -- ====================================================================================== --
 
@@ -629,7 +651,7 @@ function rareLib:AddTextbox(options)
     return API
 end
 -- ====================================================================================== --
--- [ 🐉 ] - RARE LIB V7 - A VERSÃO MINIMALISTA PERFEITA - by RARO XT & DRIP
+-- [ 🐉 ] - RARE LIB V6 - A VERSÃO MINIMALISTA - by RARO XT & DRIP
 -- [ ! ] - PARTE 11/20: A CONSTELAÇÃO E O PACOTE FINAL
 -- ====================================================================================== --
 
@@ -693,7 +715,7 @@ function rareLib:__buildConstellation()
     end)
 end
 
--- ID: K2 - ATUALIZANDO O CONSTRUTOR MESTRE PARA INICIALIZAR A CONSTECAÇÃO
+-- ID: K2 - ATUALIZANDO O CONSTRUTOR MESTRE PELA ÚLTIMA VEZ
 local OriginalNew_K = rareLib.new
 function rareLib:new(Title)
     local Hub = OriginalNew_K(self, Title)
