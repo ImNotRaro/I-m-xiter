@@ -742,13 +742,13 @@ function rareLib:AddToggle(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
--- [ ! ] - PARTE 10/20: SLIDERS (ADD SLIDER)
+-- [ ! ] - PARTE 10/20: SLIDERS (ADD SLIDER) - REFORMA DE ESPAÇAMENTO
 -- ====================================================================================== --
 
 -- ID: J1 - A API PÚBLICA PARA CRIAR SLIDERS: Tab:AddSlider({...})
 function rareLib:AddSlider(options)
     local options = options or {}
-    options.RightSideWidth = options.RightSideWidth or 120 
+    options.RightSideWidth = options.RightSideWidth or 130 -- AUMENTADO PARA 130!
     local Theme = self.ParentHub.Theme
     local Min, Max = options.Min or 0, options.Max or 100
     local Default = math.clamp(options.Default or 0, Min, Max)
@@ -760,7 +760,7 @@ function rareLib:AddSlider(options)
     -- 1. Holder da Barra e do Valor
     local SliderHolder = self.pCreate("Frame", {
         Parent = MainContainer, Name = "SliderHolder", 
-        Size = UDim2.new(0, options.RightSideWidth - 4, 0, 20),
+        Size = UDim2.new(0, options.RightSideWidth - 4, 0, 20), -- Largura total de 126px agora
         Position = UDim2.new(1, -options.RightSideWidth + 4, 0.5, 0),
         AnchorPoint = Vector2.new(0, 0.5), BackgroundTransparency = 1,
         ZIndex = 2
@@ -775,7 +775,7 @@ function rareLib:AddSlider(options)
     })
     
     -- 3. Barra Principal (Fica à esquerda do ValueLabel)
-    local BarWidth = options.RightSideWidth - 30 - 4 
+    local BarWidth = options.RightSideWidth - 30 - 10 -- AUMENTADO O ESPAÇAMENTO DE 4 PARA 10 (130 - 30 - 10 = 90px de barra)
     local SliderBar = self.pCreate("Frame", {
         Parent = SliderHolder, Name = "SliderBar", BackgroundColor3 = Theme["Color Stroke"],
         Size = UDim2.new(0, BarWidth, 0, 6), Position = UDim2.new(0, 0, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5),
