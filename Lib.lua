@@ -865,7 +865,7 @@ function rareLib:AddSlider(options)
 end
 -- ====================================================================================== --
 -- [ 🐉 ] - RARE LIB V7 - O LEGADO DO DRIP (A VERSÃO FINAL) - by RARO XT & DRIP
--- [ ! ] - PARTE 11/20: DROPDOWNS (ADD DROPDOWN)
+-- [ ! ] - PARTE 11/20: DROPDOWNS (ADD DROPDOWN) - REFORMA DE BUG DE TAMANHO
 -- ====================================================================================== --
 
 -- ID: K1 - A API PÚBLICA PARA CRIAR DROPDOWNS: Tab:AddDropdown({...})
@@ -909,7 +909,8 @@ function rareLib:AddDropdown(options)
     
     -- 3. Lista de Opções (DENTRO do Overlay)
     local ListPanel = self.pCreate("ScrollingFrame", {
-        Parent = Overlay, Name = "ListPanel", Size = UDim2.new(0, options.RightSideWidth - 8, 0, 1), 
+        Parent = Overlay, Name = "ListPanel", 
+        Size = UDim2.new(0, options.RightSideWidth - 8, 0, 200), -- Altura inicial de 200 para garantir o CanvasSize
         BackgroundColor3 = Theme["Color Hub BG"],
         BorderColor3 = Theme["Color Theme"], BorderSizePixel = 1, ZIndex = 101,
         ScrollBarImageColor3 = Theme["Color Theme"], ScrollBarThickness = 4,
@@ -918,18 +919,22 @@ function rareLib:AddDropdown(options)
     self.pCreate("UICorner", {Parent = ListPanel, CornerRadius = UDim.new(0, Config.CornerRadius - 4)})
     self.pCreate("UIListLayout", {Parent = ListPanel, Padding = UDim.new(0, 2), SortOrder = Enum.SortOrder.LayoutOrder})
     self.pCreate("UIPadding", {Parent = ListPanel, PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)})
-    
+
     -- 4. Funções de Toggle
     local function ToggleDropdown()
         isDropdownVisible = not isDropdownVisible
         
         if isDropdownVisible then
             local pos = DropdownButton.AbsolutePosition
-            ListPanel.Size = UDim2.new(0, options.RightSideWidth - 8, 0, 1) 
-            task.wait() 
+            Overlay.Visible = true -- Torna o overlay visível primeiro
+            ListPanel.Visible = true -- Torna a lista visível
+
+            -- FORÇA O LAYOUT A ATUALIZAR, GARANTINDO O CANVASSIZE
+            ListPanel.CanvasSize = UDim2.new(0, 0, 0, 0) -- Reseta o CanvasSize
+            ListPanel.CanvasSize = UDim2.new(0, 0, 0, ListPanel.UIListLayout.AbsoluteContentSize.Y) -- Força o cálculo do layout
             
             local listHeight = ListPanel.CanvasSize.Y.Offset
-            local targetHeight = math.min(listHeight + 10, 200) 
+            local targetHeight = math.min(listHeight + 10, 200) -- Limita a 200px
             
             -- CÁLCULO DE POSIÇÃO PRECISO
             local x = pos.X
@@ -938,11 +943,12 @@ function rareLib:AddDropdown(options)
                 y = pos.Y - targetHeight 
             end
             
-            Overlay.Visible = true
             ListPanel.Position = UDim2.fromOffset(x, y)
+            -- ANIMA A ALTURA AGORA QUE ELA É CONHECIDA
             TweenService:Create(ListPanel, TweenInfo.new(0.2), {Size = UDim2.new(0, options.RightSideWidth - 8, 0, targetHeight)}):Play()
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 180}):Play()
         else
+            -- ANIMA DE VOLTA PARA UMA ALTURA MÍNIMA
             TweenService:Create(ListPanel, TweenInfo.new(0.2), {Size = UDim2.new(0, options.RightSideWidth - 8, 0, 1)}):Play()
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
             task.delay(0.2, function() Overlay.Visible = false end)
@@ -962,7 +968,7 @@ function rareLib:AddDropdown(options)
     -- 5. População da Lista
     for _, option in ipairs(Options) do
         local optButton = self.pCreate("TextButton", {
-            Parent = ListPanel, Size = UDim2.new(1, 0, 0, 22), 
+            Parent = ListPanel, Size = UDim2.new(1, 0, 0, 22),
             BackgroundColor3 = Theme["Color Hub BG"],
             Text = "  " .. option, Font = Enum.Font.Gotham, TextColor3 = Theme["Color Text"],
             TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, AutoButtonColor = false, ZIndex = 102
