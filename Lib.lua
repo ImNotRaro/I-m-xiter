@@ -139,20 +139,67 @@ function rareLib:new(options)
 
     -- Tornar a TitleBar arrastável
     self.pMakeDrag(self.MainFrame, TitleBar) 
-    
-    -- Botão flutuante para abrir/fechar (UX)
-    local ToggleButton = self.pCreate("TextButton", {
-        Parent = self.MainGui, Size = UDim2.new(0, 40, 0, 40), Position = UDim2.new(0, 15, 0.5, -20),
-        BackgroundColor3 = self.Theme["Color Theme"], Text = "愛", Font = Enum.Font.GothamBold,
-        TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 24, ZIndex = 100
-    })
-    self.pCreate("UICorner", {Parent = ToggleButton, CornerRadius = UDim.new(1, 0)})
-    self.pCreate("UIStroke", {Parent = ToggleButton, Color = Color3.fromRGB(255, 255, 255), Thickness = 1})
-    ToggleButton.MouseButton1Click:Connect(function() 
-        self.MainFrame.Visible = not self.MainFrame.Visible 
-    end)
-    self.pMakeDrag(ToggleButton, ToggleButton)
 
+    -- [☯] BOTÃO FLUTUANTE - DRIP EDITION
+local TweenService = game:GetService("TweenService")
+
+-- Cria o botão
+local ToggleButton = self.pCreate("TextButton", {
+    Parent = self.MainGui,
+    Size = UDim2.new(0, 60, 0, 60), -- 🔺 Tamanho aumentado (de 40x40 para 60x60)
+    Position = UDim2.new(0, 15, 0.5, -30),
+    BackgroundColor3 = Color3.fromRGB(20, 0, 0), -- 🔺 Fundo preto avermelhado
+    Text = "☯",
+    Font = Enum.Font.GothamBold,
+    TextColor3 = Color3.fromRGB(255, 0, 0), -- 🔺 Vermelho vibrante no símbolo
+    TextSize = 28,
+    ZIndex = 100
+})
+
+-- Borda e arredondamento
+self.pCreate("UICorner", {
+    Parent = ToggleButton,
+    CornerRadius = UDim.new(1, 0) -- botão circular
+})
+self.pCreate("UIStroke", {
+    Parent = ToggleButton,
+    Color = Color3.fromRGB(255, 0, 0),
+    Thickness = 2
+})
+
+-- Animação ao passar o mouse (hover)
+ToggleButton.MouseEnter:Connect(function()
+    TweenService:Create(ToggleButton, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+        TextColor3 = Color3.fromRGB(0, 0, 0)
+    }):Play()
+end)
+
+-- Volta ao normal quando sai do mouse
+ToggleButton.MouseLeave:Connect(function()
+    TweenService:Create(ToggleButton, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundColor3 = Color3.fromRGB(20, 0, 0),
+        TextColor3 = Color3.fromRGB(255, 0, 0)
+    }):Play()
+end)
+
+-- Efeito ao clicar (leve "pulso")
+ToggleButton.MouseButton1Click:Connect(function()
+    TweenService:Create(ToggleButton, TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {
+        Size = UDim2.new(0, 55, 0, 55)
+    }):Play()
+    task.wait(0.1)
+    TweenService:Create(ToggleButton, TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+
+    -- Mostra/esconde o painel principal
+    self.MainFrame.Visible = not self.MainFrame.Visible
+end)
+
+-- Permite arrastar o botão
+self.pMakeDrag(ToggleButton, ToggleButton)
+    
     return self
 end
 -- ====================================================================================== --
