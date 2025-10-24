@@ -140,34 +140,34 @@ function rareLib:new(options)
     -- Tornar a TitleBar arrastável
     self.pMakeDrag(self.MainFrame, TitleBar) 
 
-    -- [☯] BOTÃO FLUTUANTE - DRIP EDITION
+-- [☯] BOTÃO FLUTUANTE - DRIP CLEAN EDITION
 local TweenService = game:GetService("TweenService")
 
 -- Cria o botão
 local ToggleButton = self.pCreate("TextButton", {
     Parent = self.MainGui,
-    Size = UDim2.new(0, 60, 0, 60), -- 🔺 Tamanho aumentado (de 40x40 para 60x60)
+    Size = UDim2.new(0, 60, 0, 60), -- 🔺 Tamanho maior
     Position = UDim2.new(0, 15, 0.5, -30),
-    BackgroundColor3 = Color3.fromRGB(20, 0, 0), -- 🔺 Fundo preto avermelhado
+    BackgroundColor3 = Color3.fromRGB(20, 0, 0), -- Preto avermelhado
     Text = "☯",
-    Font = Enum.Font.GothamBold,
-    TextColor3 = Color3.fromRGB(255, 0, 0), -- 🔺 Vermelho vibrante no símbolo
-    TextSize = 28,
+    Font = Enum.Font.GothamSemibold, -- 🔹 Fonte mais fina e elegante
+    TextColor3 = Color3.fromRGB(255, 0, 0), -- Vermelho vivo
+    TextSize = 26, -- 🔹 Tamanho reduzido para ficar mais harmônico
     ZIndex = 100
 })
 
--- Borda e arredondamento
+-- Bordas e forma
 self.pCreate("UICorner", {
     Parent = ToggleButton,
-    CornerRadius = UDim.new(1, 0) -- botão circular
+    CornerRadius = UDim.new(1, 0)
 })
 self.pCreate("UIStroke", {
     Parent = ToggleButton,
     Color = Color3.fromRGB(255, 0, 0),
-    Thickness = 2
+    Thickness = 1.8
 })
 
--- Animação ao passar o mouse (hover)
+-- Animação de hover
 ToggleButton.MouseEnter:Connect(function()
     TweenService:Create(ToggleButton, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         BackgroundColor3 = Color3.fromRGB(255, 0, 0),
@@ -175,7 +175,7 @@ ToggleButton.MouseEnter:Connect(function()
     }):Play()
 end)
 
--- Volta ao normal quando sai do mouse
+-- Volta ao normal quando o mouse sai
 ToggleButton.MouseLeave:Connect(function()
     TweenService:Create(ToggleButton, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         BackgroundColor3 = Color3.fromRGB(20, 0, 0),
@@ -183,7 +183,7 @@ ToggleButton.MouseLeave:Connect(function()
     }):Play()
 end)
 
--- Efeito ao clicar (leve "pulso")
+-- Animação de clique (pulso rápido)
 ToggleButton.MouseButton1Click:Connect(function()
     TweenService:Create(ToggleButton, TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {
         Size = UDim2.new(0, 55, 0, 55)
@@ -193,13 +193,12 @@ ToggleButton.MouseButton1Click:Connect(function()
         Size = UDim2.new(0, 60, 0, 60)
     }):Play()
 
-    -- Mostra/esconde o painel principal
+    -- Alterna a visibilidade do painel principal
     self.MainFrame.Visible = not self.MainFrame.Visible
 end)
 
--- Permite arrastar o botão
-self.pMakeDrag(ToggleButton, ToggleButton)
-    
+-- Deixa o botão arrastável
+self.pMakeDrag(ToggleButton, ToggleButton)    
     return self
 end
 -- ====================================================================================== --
